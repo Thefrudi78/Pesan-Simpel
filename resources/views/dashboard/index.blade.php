@@ -10,9 +10,13 @@
     <div class="app-container">
         <aside class="sidebar">
             <h2>Chats</h2>
-            <div class="contact active">Froni</div>
-            <div class="contact">Martin</div>
-            <div class="contact">Iki</div>
+            @foreach ($users as $user)
+                <div class="contact">{{ $user->name }}</div>
+            @endforeach
+            <form method="POST" action="{{ route('logout') }}" style="position: absolute; bottom: 10px; left: 10px;">
+                @csrf
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
         </aside>
 
         <main class="chat-area">
