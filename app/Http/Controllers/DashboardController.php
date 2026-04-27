@@ -12,14 +12,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $users = User::all();
         $users = User::where('id', '!=', auth()->id())->get();
 
-        $messages = Message::where('receiver_id', auth()->id())
-            ->latest()
-            ->get()
-            ->groupBy('sender_id');
-            //dd($messages);
+        $messages = Message::where(function ($query) {
+            $query->where('receiver_id', auth()->id())
+                  ->orWhere('sender_id', auth()->id());
+        })
+        ->oldest()
+        ->get()
+        ->groupBy(function ($message) {
+            return $message->sender_id === auth()->id() ? $message->receiver_id : $message->sender_id;
+        });
+
         return view('dashboard.index', compact('users', 'messages'));
     }
 
@@ -27,14 +31,13 @@ class DashboardController extends Controller
     {
         $request->validate([
             'receiver_id' => 'required|exists:users,id',
-            'content' => 'required|string',
+            'message' => 'required|string',
         ]);
-        dd($request->all());
-
+        //dd($request->all());
         Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'content' => $request->content,
+            'content' => $request->message,
         ]);
 
         return redirect()->route('chat');

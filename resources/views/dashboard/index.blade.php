@@ -10,6 +10,7 @@
     <div class="app-container">
         <aside class="sidebar">
             <h2><img src="{{ asset('images/Logo.png') }}" alt="Chat Logo" style="width: 150px; height: auto;"></h2>
+            
             <script>
                 // Ensure this is an object, even if empty
                 const messages = @json($messages) || {};
@@ -25,13 +26,24 @@
                     const recipientIdInput = document.getElementById('receiver_id');
                     recipientIdInput.value = userId;
 
+                    // Enable the message input and send button now that a contact is selected
+                    document.getElementById('msgInput').disabled = false;
+                    document.getElementById('sendBtn').disabled = false;
+
                     // Check if there are messages for this specific sender (userId)
                     if (messages[userId] && messages[userId].length > 0) {
                         messages[userId].forEach(message => {
                             const messageDiv = document.createElement('div');
-                            messageDiv.classList.add('message', 'received');
-                            
-                            // Format the date/time (optional improvement)
+                            messageDiv.classList.add('message');
+
+                            // Determine if the message is sent or received
+                            if (message.sender_id === {{ auth()->id() }}) {
+                                messageDiv.classList.add('sent');
+                            } else {
+                                messageDiv.classList.add('received');
+                            }
+
+                            // Format the date/time
                             const time = new Date(message.created_at).toLocaleTimeString([], { 
                                 hour: '2-digit', 
                                 minute: '2-digit' 
@@ -41,11 +53,22 @@
                                 <p>${message.content}</p>
                                 <span class="time">${time}</span>
                             `;
-                            messageDisplay.appendChild(messageDiv);
+                            messageDisplay.appendChild(messageDiv); // Append to the bottom
                         });
                     } else {
                         messageDisplay.innerHTML = '<div class="no-messages">No messages from this user.</div>';
                     }
+                }
+
+                // Client-side validation before submitting
+                function validateForm(event) {
+                    const receiverId = document.getElementById('receiver_id').value;
+                    if (!receiverId) {
+                        event.preventDefault();
+                        alert('Please select a contact before sending a message.');
+                        return false;
+                    }
+                    return true;
                 }
             </script>
 
@@ -65,20 +88,31 @@
             </header>
 
             <div class="message-display" id="messageDisplay">
+                {{-- Display Backend Errors if any --}}
+                @if ($errors->any())
+                    <div class="error-messages" style="color: red; padding: 10px;">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="message received">
                     <p>Select one of the contacts to start chatting.</p>
                     <span class="time">{{ now()->format('H:i') }}</span>
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('send') }}" class="input-area">
+            <form method="POST" action="{{ route('send') }}" class="input-area" id="chatForm" onsubmit="return validateForm(event)">
                 @csrf
                 <input type="hidden" name="receiver_id" id="receiver_id">
-                <input type="text" id="msgInput" name="message" placeholder="Type a message..." autocomplete="off">
-                <button type="submit">Send</button>
+                {{-- Added 'required' and disabled by default until a contact is clicked --}}
+                <input type="text" id="msgInput" name="message" placeholder="Type a message..." autocomplete="off" required disabled>
+                <button type="submit" id="sendBtn" disabled>Send</button>
             </form>
         </main>
     </div>
-    <script src="{{ asset('js/script.js') }}"></script>
 </body>
 </html>
