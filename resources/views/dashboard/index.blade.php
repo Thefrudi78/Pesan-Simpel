@@ -76,7 +76,7 @@
                 <div class="contact" onclick="selectContact('{{ $user->name }}', {{ $user->id }})">{{ $user->name }}</div>
             @endforeach
 
-            <form method="POST" action="{{ route('logout') }}" style="position: absolute; bottom: 10px; left: 10px;">
+            <form method="POST" action="{{ route('logout') }}" class="logout-form">
                 @csrf
                 <button type="submit" class="logout-button">Logout</button>
             </form>

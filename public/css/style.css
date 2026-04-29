@@ -234,3 +234,24 @@ body {
 .demo-info p {
     margin: 5px 0;
 }
+
+.logout-form {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.logout-button:hover {
+    background: #c0392b;
+}
