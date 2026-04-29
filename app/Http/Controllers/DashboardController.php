@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class DashboardController extends Controller
 {
@@ -23,6 +25,16 @@ class DashboardController extends Controller
         ->groupBy(function ($message) {
             return $message->sender_id === auth()->id() ? $message->receiver_id : $message->sender_id;
         });
+        $messages->transform(function ($group) {
+            return $group->map(function ($message) {
+                try {
+                    $message->content = Crypt::decrypt($message->content);
+                } catch (DecryptException $e) {
+                    $message->content = '[Unable to decrypt message]';
+                }
+                return $message;
+            });
+        });
 
         return view('dashboard.index', compact('users', 'messages'));
     }
@@ -37,7 +49,7 @@ class DashboardController extends Controller
         Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'content' => $request->message,
+            'content' => Crypt::encrypt($request->message),
         ]);
 
         return redirect()->route('chat');

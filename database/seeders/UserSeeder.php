@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -22,6 +24,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make('password'), // Default password
             'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)), // Add a random key for encryption
         ]);
         User::create([
             'name' => 'Froni',
@@ -29,6 +32,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make('password'), // Default password
             'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)), // Add a random key for encryption
         ]);
         User::create([
             'name' => 'Martin',
@@ -36,7 +40,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make('password'), // Default password
             'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)), // Add a random key for encryption
         ]);
-
     }
 }
