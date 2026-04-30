@@ -30,6 +30,11 @@
                     document.getElementById('msgInput').disabled = false;
                     document.getElementById('sendBtn').disabled = false;
 
+                    // --- TAMBAHAN: Simpan kontak terakhir ke Local Storage ---
+                    localStorage.setItem('lastChatUserId', userId);
+                    localStorage.setItem('lastChatUserName', name);
+                    // --------------------------------------------------------
+
                     // Check if there are messages for this specific sender (userId)
                     if (messages[userId] && messages[userId].length > 0) {
                         messages[userId].forEach(message => {
@@ -58,6 +63,9 @@
                     } else {
                         messageDisplay.innerHTML = '<div class="no-messages">No messages from this user.</div>';
                     }
+                    
+                    // Opsional: Scroll otomatis ke bawah agar pesan terbaru langsung terlihat
+                    messageDisplay.scrollTop = messageDisplay.scrollHeight;
                 }
 
                 // Client-side validation before submitting
@@ -70,6 +78,21 @@
                     }
                     return true;
                 }
+
+                // --- TAMBAHAN: Cek Local Storage saat halaman selesai di-reload ---
+                document.addEventListener('DOMContentLoaded', function() {
+                    const lastUserId = localStorage.getItem('lastChatUserId');
+                    const lastUserName = localStorage.getItem('lastChatUserName');
+
+                    // Jika ada data kontak yang tersimpan, panggil fungsi selectContact secara otomatis
+                    if (lastUserId && lastUserName) {
+                        selectContact(lastUserName, parseInt(lastUserId));
+                        
+                        // FOKUSKAN kursor kembali ke kolom input setelah halaman dimuat
+                        document.getElementById('msgInput').focus();
+                    }
+                });
+                // ------------------------------------------------------------------
             </script>
 
             @foreach ($users as $user)
