@@ -131,10 +131,6 @@
             document.getElementById('msgInput').disabled = false;
             document.getElementById('sendBtn').disabled  = false;
 
-            // Simpan ke localStorage
-            localStorage.setItem('lastChatUserId',   userId);
-            localStorage.setItem('lastChatUserName', name);
-
             // Hentikan polling lama, mulai polling baru
             if (pollingInterval) clearInterval(pollingInterval);
 
@@ -214,13 +210,6 @@
                 showError('⚠️ Gagal mengirim pesan. Coba lagi.');
             });
         }
-
-        // ── Restore kontak terakhir saat refresh ──────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
-            const lastId   = localStorage.getItem('lastChatUserId');
-            const lastName = localStorage.getItem('lastChatUserName');
-            if (lastId && lastName) selectContact(lastName, parseInt(lastId));
-        });
     </script>
 </body>
 </html>
