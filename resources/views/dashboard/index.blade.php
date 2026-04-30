@@ -776,7 +776,7 @@
         <div class="sidebar-footer">
             <form method="POST" action="{{ route('logout') }}" id="logoutForm" style="margin:0;">
                 @csrf
-                <button type="submit" class="btn btn-danger w-100" id="logoutBtn">Logout</button>
+                <button type="submit" class="logout-btn" id="logoutBtn">Logout</button>
             </form>
         </div>
     </aside>
@@ -863,8 +863,8 @@
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Ya, logout!',
                 cancelButtonText: 'Batal',
-                backdrop: false,          // tidak ada overlay gelap
-                scrollbarPadding: false   // cegah padding tambahan di body
+                backdrop: false,
+                scrollbarPadding: false
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
@@ -875,6 +875,16 @@
         // ── Variabel global ─────────────────────────────────────────────────
         const myId = {{ auth()->id() }};
         let pollingInterval = null;
+        const displayedMessageIds = new Set(); // Melacak ID pesan yang sudah ditampilkan
+
+        // ── Fungsi untuk menambahkan satu pesan ke DOM (tanpa mengganti semuanya) ──
+        function appendMessage(msg, container) {
+            const div = document.createElement('div');
+            const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            div.classList.add('message', msg.sender_id === myId ? 'sent' : 'received');
+            div.innerHTML = `<p>${msg.content}</p><span class="time">${time}</span>`;
+            container.appendChild(div);
+        }
 
         // ── Mobile Drawer ──────────────────────────────────────────────────
         (function() {
@@ -946,12 +956,14 @@
             document.getElementById('msgInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
 
+            // Reset pelacak pesan
+            displayedMessageIds.clear();
             if (pollingInterval) clearInterval(pollingInterval);
             fetchMessages(userId);
             pollingInterval = setInterval(() => fetchMessages(userId), 3000);
         }
 
-        // ── Ambil & Tampilkan Pesan ────────────────────────────────────────
+        // ── Ambil & Tampilkan Pesan (tanpa kedip) ─────────────────────────
         function fetchMessages(userId) {
             fetch(`/messages/${userId}`)
                 .then(res => {
@@ -960,25 +972,33 @@
                 })
                 .then(messages => {
                     const display = document.getElementById('messageDisplay');
-                    const isAtBottom = display.scrollHeight - display.clientHeight <= display.scrollTop + 5;
 
-                    display.innerHTML = '';
-
-                    if (!messages || messages.length === 0) {
-                        display.innerHTML = '<div style="text-align:center;color:var(--chat-text-muted);padding:40px;">No messages yet. Say hello! 👋</div>';
-                        return;
+                    // Jika belum ada pesan yang ditampilkan (set kosong), ini pertama kali
+                    if (displayedMessageIds.size === 0) {
+                        display.innerHTML = ''; // bersihkan placeholder lama
+                        if (!messages || messages.length === 0) {
+                            display.innerHTML = '<div style="text-align:center;color:var(--chat-text-muted);padding:40px;">No messages yet. Say hello! 👋</div>';
+                            return;
+                        }
+                        // Tampilkan semua pesan
+                        messages.forEach(msg => {
+                            appendMessage(msg, display);
+                            displayedMessageIds.add(msg.id);
+                        });
+                    } else {
+                        // Polling berikutnya: hanya tambahkan pesan yang ID-nya belum ada
+                        const newMessages = messages.filter(msg => !displayedMessageIds.has(msg.id));
+                        newMessages.forEach(msg => {
+                            appendMessage(msg, display);
+                            displayedMessageIds.add(msg.id);
+                        });
                     }
 
-                    messages.forEach(msg => {
-                        const div = document.createElement('div');
-                        const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                        div.classList.add('message', msg.sender_id === myId ? 'sent' : 'received');
-                        div.innerHTML = `<p>${msg.content}</p><span class="time">${time}</span>`;
-                        display.appendChild(div);
-                    });
-
-                    if (isAtBottom) display.scrollTop = display.scrollHeight;
+                    // Auto-scroll ke bawah jika pengguna berada di bawah
+                    const isAtBottom = display.scrollHeight - display.clientHeight <= display.scrollTop + 50;
+                    if (isAtBottom) {
+                        display.scrollTop = display.scrollHeight;
+                    }
                 })
                 .catch(err => {
                     console.error('fetchMessages error:', err);
@@ -1012,6 +1032,7 @@
                 return res.json();
             })
             .then(() => {
+                // Setelah kirim, langsung fetch ulang (polling akan menambahkan pesan baru tanpa kedip)
                 fetchMessages(receiverId);
             })
             .catch(err => {
@@ -1020,15 +1041,18 @@
             });
         }
 
-        // ── Auto-scroll observer ───────────────────────────────────────────
+        // ── Observer untuk fallback auto-scroll (hanya untuk elemen baru) ──
         (function() {
             const msgDisplay = document.getElementById('messageDisplay');
             if (!msgDisplay) return;
             const observer = new MutationObserver(() => {
-                msgDisplay.scrollTop = msgDisplay.scrollHeight;
+                // Scroll hanya jika pengguna berada di dekat bawah
+                const isNearBottom = msgDisplay.scrollHeight - msgDisplay.clientHeight <= msgDisplay.scrollTop + 60;
+                if (isNearBottom) {
+                    msgDisplay.scrollTop = msgDisplay.scrollHeight;
+                }
             });
             observer.observe(msgDisplay, { childList: true });
-            msgDisplay.scrollTop = msgDisplay.scrollHeight;
         })();
     </script>
 </body>
