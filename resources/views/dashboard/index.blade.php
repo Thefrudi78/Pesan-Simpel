@@ -249,7 +249,7 @@
             user-select: none;
         }
 
-        .contact::before {
+        /* .contact::before {
             content: "";
             width: 38px;
             height: 38px;
@@ -264,7 +264,7 @@
             color: #cbd5e1;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
             flex-shrink: 0;
-        }
+        } */
 
         .contact:hover {
             background: var(--sidebar-hover);
@@ -319,7 +319,7 @@
         }
 
         .logout-btn::before {
-            content: "⏻";
+            content: "";
             font-size: 16px;
         }
 
@@ -767,6 +767,7 @@
         <div id="users" class="contacts-list">
             @foreach ($users as $user)
                 <div class="contact" onclick="selectContact('{{ $user->name }}', {{ $user->id }})">
+                    <div class="user-avatar">👤</div>
                     {{ $user->name }}
                 </div>
             @endforeach
