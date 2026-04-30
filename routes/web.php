@@ -12,6 +12,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('chat');
+    Route::get('/messages/{userId}', [App\Http\Controllers\DashboardController::class, 'getMessages'])->name('messages.get');
     Route::post('/send', [App\Http\Controllers\DashboardController::class, 'send'])->name('send');
 
     Route::post('/logout', function () {

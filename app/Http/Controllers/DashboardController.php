@@ -16,27 +16,29 @@ class DashboardController extends Controller
     {
         $users = User::where('id', '!=', auth()->id())->get();
 
-        $messages = Message::where(function ($query) {
+        return view('dashboard.index', compact('users'));
+    }
+
+    public function getMessages($userId)
+    {
+        $messages = Message::where(function ($query) use ($userId) {
             $query->where('receiver_id', auth()->id())
-                  ->orWhere('sender_id', auth()->id());
-        })
-        ->oldest()
-        ->get()
-        ->groupBy(function ($message) {
-            return $message->sender_id === auth()->id() ? $message->receiver_id : $message->sender_id;
-        });
-        $messages->transform(function ($group) {
-            return $group->map(function ($message) {
-                try {
-                    $message->content = Crypt::decrypt($message->content);
-                } catch (DecryptException $e) {
-                    $message->content = '[Unable to decrypt message]';
-                }
-                return $message;
-            });
+                  ->where('sender_id', $userId);
+        })->orWhere(function ($query) use ($userId) {
+            $query->where('sender_id', auth()->id())
+                  ->where('receiver_id', $userId);
+        })->oldest()->get();
+
+        $messages->transform(function ($message) {
+            try {
+                $message->content = Crypt::decrypt($message->content);
+            } catch (DecryptException $e) {
+                $message->content = '[Unable to decrypt message]';
+            }
+            return $message;
         });
 
-        return view('dashboard.index', compact('users', 'messages'));
+        return response()->json($messages);
     }
 
     public function send(Request $request)

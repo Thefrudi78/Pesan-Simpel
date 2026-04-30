@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleChat UI</title>
+    <title>OnlyChat</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body>
@@ -12,87 +12,130 @@
             <h2><img src="{{ asset('images/Logo.png') }}" alt="Chat Logo" style="width: 150px; height: auto;"></h2>
             
             <script>
-                // Ensure this is an object, even if empty
-                const messages = @json($messages) || {};
+                let pollingInterval = null; // Menyimpan jadwal agar bisa dihentikan saat ganti kontak
+                const myId = {{ auth()->id() }}; // Menyimpan ID user yang sedang login
 
                 function selectContact(name, userId) {
                     const chatHeader = document.querySelector('.chat-header h3');
                     chatHeader.textContent = name;
 
-                    const messageDisplay = document.getElementById('messageDisplay');
-                    messageDisplay.innerHTML = '';
-
                     // Set the recipient ID in the hidden input field
                     const recipientIdInput = document.getElementById('receiver_id');
                     recipientIdInput.value = userId;
 
-                    // Enable the message input and send button now that a contact is selected
+                    // Enable the message input and send button
                     document.getElementById('msgInput').disabled = false;
                     document.getElementById('sendBtn').disabled = false;
 
-                    // --- TAMBAHAN: Simpan kontak terakhir ke Local Storage ---
+                    // Simpan ke Local Storage (seperti yang kita buat sebelumnya)
                     localStorage.setItem('lastChatUserId', userId);
                     localStorage.setItem('lastChatUserName', name);
-                    // --------------------------------------------------------
 
-                    // Check if there are messages for this specific sender (userId)
-                    if (messages[userId] && messages[userId].length > 0) {
-                        messages[userId].forEach(message => {
-                            const messageDiv = document.createElement('div');
-                            messageDiv.classList.add('message');
+                    // --- SISTEM POLLING DIMULAI ---
+                    
+                    // 1. Hentikan polling dari kontak sebelumnya jika ada
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                    }
 
-                            // Determine if the message is sent or received
-                            if (message.sender_id === {{ auth()->id() }}) {
-                                messageDiv.classList.add('sent');
+                    // 2. Langsung ambil pesan saat kontak di-klik (tidak perlu nunggu 3 detik pertama)
+                    fetchMessages(userId);
+
+                    // 3. Mulai jadwal cek pesan baru setiap 3 detik (3000 ms)
+                    pollingInterval = setInterval(() => {
+                        fetchMessages(userId);
+                    }, 3000); 
+                }
+
+                // Fungsi untuk menarik data pesan dari Laravel (AJAX)
+                function fetchMessages(userId) {
+                    fetch(`/messages/${userId}`)
+                        .then(response => response.json())
+                        .then(messages => {
+                            const messageDisplay = document.getElementById('messageDisplay');
+                            
+                            // Cek apakah user sedang scroll ke atas (agar layar tidak dipaksa ke bawah saat dia baca pesan lama)
+                            const isScrolledToBottom = messageDisplay.scrollHeight - messageDisplay.clientHeight <= messageDisplay.scrollTop + 5;
+
+                            // Kosongkan layar pesan
+                            messageDisplay.innerHTML = '';
+
+                            if (messages.length > 0) {
+                                messages.forEach(message => {
+                                    const messageDiv = document.createElement('div');
+                                    messageDiv.classList.add('message');
+
+                                    // Bedakan warna chat pengirim dan penerima
+                                    if (message.sender_id === myId) {
+                                        messageDiv.classList.add('sent');
+                                    } else {
+                                        messageDiv.classList.add('received');
+                                    }
+
+                                    const time = new Date(message.created_at).toLocaleTimeString([], { 
+                                        hour: '2-digit', minute: '2-digit' 
+                                    });
+
+                                    messageDiv.innerHTML = `
+                                        <p>${message.content}</p>
+                                        <span class="time">${time}</span>
+                                    `;
+                                    messageDisplay.appendChild(messageDiv);
+                                });
                             } else {
-                                messageDiv.classList.add('received');
+                                messageDisplay.innerHTML = '<div class="no-messages">Belum ada pesan.</div>';
                             }
 
-                            // Format the date/time
-                            const time = new Date(message.created_at).toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                            });
-
-                            messageDiv.innerHTML = `
-                                <p>${message.content}</p>
-                                <span class="time">${time}</span>
-                            `;
-                            messageDisplay.appendChild(messageDiv); // Append to the bottom
-                        });
-                    } else {
-                        messageDisplay.innerHTML = '<div class="no-messages">No messages from this user.</div>';
-                    }
-                    
-                    // Opsional: Scroll otomatis ke bawah agar pesan terbaru langsung terlihat
-                    messageDisplay.scrollTop = messageDisplay.scrollHeight;
+                            // Otomatis scroll ke bawah JIKA sebelumnya posisi scroll ada di bawah
+                            if (isScrolledToBottom) {
+                                messageDisplay.scrollTop = messageDisplay.scrollHeight;
+                            }
+                        })
+                        .catch(error => console.error('Error fetching messages:', error));
                 }
 
-                // Client-side validation before submitting
-                function validateForm(event) {
+                // Fungsi Mengirim Pesan Tanpa Reload
+                function sendMessage(event) {
+                    event.preventDefault(); // Mencegah form reload halaman
+
                     const receiverId = document.getElementById('receiver_id').value;
                     if (!receiverId) {
-                        event.preventDefault();
                         alert('Please select a contact before sending a message.');
-                        return false;
+                        return;
                     }
-                    return true;
+
+                    const form = document.getElementById('chatForm');
+                    const formData = new FormData(form);
+                    const msgInput = document.getElementById('msgInput');
+
+                    msgInput.value = ''; // Kosongkan kotak ketik
+                    msgInput.focus();    // Kembalikan kursor ke kotak ketik
+
+                    // Kirim data ke backend
+                    fetch("{{ route('send') }}", {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Setelah terkirim, paksa update layar agar pesan langsung muncul (tanpa nunggu 3 detik)
+                        fetchMessages(receiverId); 
+                    })
+                    .catch(error => console.error('Error sending message:', error));
                 }
 
-                // --- TAMBAHAN: Cek Local Storage saat halaman selesai di-reload ---
+                // Cek Local Storage saat halaman di-refresh
                 document.addEventListener('DOMContentLoaded', function() {
                     const lastUserId = localStorage.getItem('lastChatUserId');
                     const lastUserName = localStorage.getItem('lastChatUserName');
 
-                    // Jika ada data kontak yang tersimpan, panggil fungsi selectContact secara otomatis
                     if (lastUserId && lastUserName) {
                         selectContact(lastUserName, parseInt(lastUserId));
-                        
-                        // FOKUSKAN kursor kembali ke kolom input setelah halaman dimuat
-                        document.getElementById('msgInput').focus();
                     }
                 });
-                // ------------------------------------------------------------------
             </script>
 
             @foreach ($users as $user)
@@ -107,7 +150,7 @@
 
         <main class="chat-area">
             <header class="chat-header">
-                <h3>System</h3>
+                <h3>OnlyChat</h3>
             </header>
 
             <div class="message-display" id="messageDisplay">
@@ -128,10 +171,9 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('send') }}" class="input-area" id="chatForm" onsubmit="return validateForm(event)">
+            <form id="chatForm" class="input-area" onsubmit="sendMessage(event)">
                 @csrf
                 <input type="hidden" name="receiver_id" id="receiver_id">
-                {{-- Added 'required' and disabled by default until a contact is clicked --}}
                 <input type="text" id="msgInput" name="message" placeholder="Type a message..." autocomplete="off" required disabled>
                 <button type="submit" id="sendBtn" disabled>Send</button>
             </form>
