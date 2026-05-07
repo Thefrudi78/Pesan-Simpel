@@ -277,7 +277,7 @@
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required placeholder="••••••••">
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
                     </div>
 
                     <button type="submit" class="login-btn">Login</button>

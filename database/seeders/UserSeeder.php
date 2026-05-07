@@ -19,14 +19,6 @@ class UserSeeder extends Seeder
     public function run()
     {
         User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'), // Default password
-            'remember_token' => Str::random(10),
-            'key' => Crypt::encryptString(Str::random(32)), // Add a random key for encryption
-        ]);
-        User::create([
             'name' => 'Froni',
             'email' => 'froni@example.com',
             'email_verified_at' => now(),
@@ -41,6 +33,30 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'), // Default password
             'remember_token' => Str::random(10),
             'key' => Crypt::encryptString(Str::random(32)), // Add a random key for encryption
+        ]);
+        User::create([
+            'name' => 'Dimas',
+            'email' => 'Dimas@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'), // Default password
+            'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)),
+        ]);
+        User::create([
+            'name' => 'Iki',
+            'email' => 'iki@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)),
+        ]);
+        User::create([
+            'name' => 'Jeki',
+            'email' => 'jeki@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)),
         ]);
     }
 }
