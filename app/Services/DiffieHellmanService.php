@@ -55,6 +55,13 @@ class DiffieHellmanService
 
         // Shared secret: theirPublicKey^ourPrivateKey mod p
         $sharedSecret = $theirPublicKey->modPow($privateKey, $p);
+        $printedSharedSecret = $sharedSecret->toHex(); // Convert to hex for demonstration
+
+        // --- DEMONSTRATION PURPOSE ONLY ---
+        // Print the raw shared secret to the console in hexadecimal format.
+        // Ensure you remove this in a production environment to prevent leaking secrets in your logs!
+        error_log("Demonstration - Shared Secret (hex): " . $printedSharedSecret);
+        // ----------------------------------
 
         // Derive AES key dengan SHA-256 (32 bytes = AES-256)
         return hash('sha256', $sharedSecret->toBytes(), true);

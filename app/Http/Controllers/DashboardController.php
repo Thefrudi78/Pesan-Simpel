@@ -64,7 +64,10 @@ class DashboardController extends Controller
             return $message;
         });
 
-        return response()->json($messages);
+        return response()->json([
+            'messages' => $messages,
+            'aes_shared_key' => $aesKey ? base64_encode($aesKey) : null, // For demonstration only
+        ]);
     }
 
     public function send(Request $request)

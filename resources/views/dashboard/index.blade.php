@@ -965,13 +965,29 @@
         }
 
         // ── Ambil & Tampilkan Pesan (tanpa kedip) ─────────────────────────
+        // ── Ambil & Tampilkan Pesan (tanpa kedip) ─────────────────────────
         function fetchMessages(userId) {
             fetch(`/messages/${userId}`)
                 .then(res => {
                     if (!res.ok) throw new Error('Gagal mengambil pesan');
                     return res.json();
                 })
-                .then(messages => {
+                .then(data => {
+                    let messages = [];
+
+                    // Check if the backend returned the new object structure { messages: [...], aes_shared_key: "..." }
+                    if (data.messages !== undefined) {
+                        messages = data.messages;
+                        
+                        // Print the AES Shared Key to console for educational purposes
+                        if (data.aes_shared_key) {
+                            console.log('🔓 Educational Mode - AES Shared Key:', data.aes_shared_key);
+                        }
+                    } else if (Array.isArray(data)) {
+                        // Fallback in case the backend still returns a raw array
+                        messages = data;
+                    }
+
                     const display = document.getElementById('messageDisplay');
 
                     // Jika belum ada pesan yang ditampilkan (set kosong), ini pertama kali
