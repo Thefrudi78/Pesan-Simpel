@@ -7,6 +7,8 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Services\DiffieHellmanService;
+use App\Models\UserKey;
 use App\Models\User;
 
 class UserSeeder extends Seeder
@@ -16,6 +18,8 @@ class UserSeeder extends Seeder
      *
      * @return void
      */
+    public function __construct(private DiffieHellmanService $dh) {}
+
     public function run()
     {
         User::create([
@@ -58,5 +62,23 @@ class UserSeeder extends Seeder
             'remember_token' => Str::random(10),
             'key' => Crypt::encryptString(Str::random(32)),
         ]);
+        User::create([
+            'name' => 'Rudi',
+            'email' => 'rudi@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+            'key' => Crypt::encryptString(Str::random(32)),
+        ]);
+
+        $users = User::all();
+        foreach ($users as $user) {
+            $keyPair = $this->dh->generateKeyPair();
+            UserKey::create([
+                'user_id'     => $user->id,
+                'public_key'  => $keyPair['public_key'],
+                'private_key' => encrypt($keyPair['private_key']),
+            ]);
+    }
     }
 }
