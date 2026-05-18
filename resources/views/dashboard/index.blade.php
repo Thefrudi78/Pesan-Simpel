@@ -8,8 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* =========================================================
            OnlyChat — Premium Encrypted Messaging UI
@@ -249,23 +247,6 @@
             user-select: none;
         }
 
-        /* .contact::before {
-            content: "";
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #334155, #1e293b);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            color: #cbd5e1;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-            flex-shrink: 0;
-        } */
-
         .contact:hover {
             background: var(--sidebar-hover);
             transform: translateX(2px);
@@ -319,7 +300,7 @@
         }
 
         .logout-btn::before {
-            content: "";
+            content: "🚪";
             font-size: 16px;
         }
 
@@ -382,7 +363,7 @@
         }
 
         .encryption-badge {
-            display: none;
+            display: inline-flex;
             align-items: center;
             gap: 5px;
             font-size: 11px;
@@ -575,13 +556,6 @@
 
         .message.sent .time { color: rgba(255, 255, 255, 0.85); }
         .message.received .time { color: var(--chat-text-muted); }
-
-        /* Lock icon */
-        .message p::after {
-            content: ' ';
-            font-size: 10px;
-            opacity: 0.5;
-        }
 
         /* ---------- INPUT AREA ---------- */
         .input-area {
@@ -851,26 +825,15 @@
     <div class="toast" id="errorToast" style="display: none;"></div>
 
     <script>
-        // ── SweetAlert Logout (backdrop dimatikan agar sidebar tidak terpotong) ──
+        // ── Logout langsung tanpa konfirmasi (SweetAlert dihapus) ──
         document.getElementById('logoutForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = this;
-            Swal.fire({
-                title: 'Logout?',
-                text: 'Anda akan kembali ke halaman login.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, logout!',
-                cancelButtonText: 'Batal',
-                backdrop: false,
-                scrollbarPadding: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+            // Tidak ada e.preventDefault() lagi, biarkan form submit normal
+            // Form akan langsung terkirim ke route logout
+            // Hapus semua event default? Biarkan form berjalan normal.
+            // Namun karena kita ingin langsung logout, kita tidak mengganggu proses submit.
+            // Kode ini hanya untuk memastikan tidak ada interupsi.
+            // Tidak perlu e.preventDefault().
+            // Form akan submit secara langsung.
         });
 
         // ── Variabel global ─────────────────────────────────────────────────
@@ -883,8 +846,21 @@
             const div = document.createElement('div');
             const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             div.classList.add('message', msg.sender_id === myId ? 'sent' : 'received');
-            div.innerHTML = `<p>${msg.content}</p><span class="time">${time}</span>`;
+            div.innerHTML = `<p>${escapeHtml(msg.content)}</p><span class="time">${time}</span>`;
             container.appendChild(div);
+        }
+
+        // Helper untuk escape XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
         }
 
         // ── Mobile Drawer ──────────────────────────────────────────────────
@@ -941,12 +917,20 @@
 
         // ── Pilih Kontak ───────────────────────────────────────────────────
         function selectContact(name, userId) {
-            document.querySelectorAll('#users .contact').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            const contactElements = document.querySelectorAll('#users .contact');
+            contactElements.forEach(el => el.classList.remove('active'));
+            // event.currentTarget tidak tersedia karena dipanggil dari onclick, gunakan window.event
+            if (window.event && window.event.currentTarget) {
+                window.event.currentTarget.classList.add('active');
+            } else {
+                // fallback: cari berdasarkan data
+                const clicked = Array.from(contactElements).find(el => el.innerText.includes(name));
+                if (clicked) clicked.classList.add('active');
+            }
 
             const headerTitle = document.getElementById('headerTitle');
             if (headerTitle) {
-                headerTitle.innerHTML = `${name} <span class="encryption-badge" id="encryptionBadge">🔐 DH + AES-256 Encrypted</span>`;
+                headerTitle.innerHTML = `${escapeHtml(name)} <span class="encryption-badge" id="encryptionBadge">🔐 DH + AES-256 Encrypted</span>`;
             }
 
             document.getElementById('welcomeScreen').classList.remove('active');
@@ -965,7 +949,6 @@
         }
 
         // ── Ambil & Tampilkan Pesan (tanpa kedip) ─────────────────────────
-        // ── Ambil & Tampilkan Pesan (tanpa kedip) ─────────────────────────
         function fetchMessages(userId) {
             fetch(`/messages/${userId}`)
                 .then(res => {
@@ -975,35 +958,28 @@
                 .then(data => {
                     let messages = [];
 
-                    // Check if the backend returned the new object structure { messages: [...], aes_shared_key: "..." }
                     if (data.messages !== undefined) {
                         messages = data.messages;
-                        
-                        // Print the AES Shared Key to console for educational purposes
                         if (data.aes_shared_key) {
                             console.log('🔓 Educational Mode - AES Shared Key:', data.aes_shared_key);
                         }
                     } else if (Array.isArray(data)) {
-                        // Fallback in case the backend still returns a raw array
                         messages = data;
                     }
 
                     const display = document.getElementById('messageDisplay');
 
-                    // Jika belum ada pesan yang ditampilkan (set kosong), ini pertama kali
                     if (displayedMessageIds.size === 0) {
-                        display.innerHTML = ''; // bersihkan placeholder lama
+                        display.innerHTML = '';
                         if (!messages || messages.length === 0) {
                             display.innerHTML = '<div style="text-align:center;color:var(--chat-text-muted);padding:40px;">No messages yet. Say hello! 👋</div>';
                             return;
                         }
-                        // Tampilkan semua pesan
                         messages.forEach(msg => {
                             appendMessage(msg, display);
                             displayedMessageIds.add(msg.id);
                         });
                     } else {
-                        // Polling berikutnya: hanya tambahkan pesan yang ID-nya belum ada
                         const newMessages = messages.filter(msg => !displayedMessageIds.has(msg.id));
                         newMessages.forEach(msg => {
                             appendMessage(msg, display);
@@ -1011,7 +987,6 @@
                         });
                     }
 
-                    // Auto-scroll ke bawah jika pengguna berada di bawah
                     const isAtBottom = display.scrollHeight - display.clientHeight <= display.scrollTop + 50;
                     if (isAtBottom) {
                         display.scrollTop = display.scrollHeight;
@@ -1049,7 +1024,6 @@
                 return res.json();
             })
             .then(() => {
-                // Setelah kirim, langsung fetch ulang (polling akan menambahkan pesan baru tanpa kedip)
                 fetchMessages(receiverId);
             })
             .catch(err => {
@@ -1058,12 +1032,11 @@
             });
         }
 
-        // ── Observer untuk fallback auto-scroll (hanya untuk elemen baru) ──
+        // ── Observer untuk fallback auto-scroll ────────────────────────────
         (function() {
             const msgDisplay = document.getElementById('messageDisplay');
             if (!msgDisplay) return;
             const observer = new MutationObserver(() => {
-                // Scroll hanya jika pengguna berada di dekat bawah
                 const isNearBottom = msgDisplay.scrollHeight - msgDisplay.clientHeight <= msgDisplay.scrollTop + 60;
                 if (isNearBottom) {
                     msgDisplay.scrollTop = msgDisplay.scrollHeight;
