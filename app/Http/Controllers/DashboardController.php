@@ -29,6 +29,9 @@ class DashboardController extends Controller
         return view('dashboard.index', compact('users'));
     }
 
+    /**
+     * Mengambil pesan sekalian munculin shared secret key (untuk demo, biasanya gak dikirim ke client)
+     */
     public function getMessages($userId)
     {
         $myKey    = UserKey::where('user_id', auth()->id())->first();
