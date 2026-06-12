@@ -12,7 +12,7 @@
     <header class="bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-6 px-4 text-center shadow-md">
         <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">🧪 Playground Interaktif: Diffie-Hellman & AES</h1>
         <p class="text-teal-100 mt-1.5 text-xs md:text-sm max-w-3xl mx-auto font-medium">
-            Seret dan jatuhkan <span class="underline font-bold">Kunci Publik</span> antar pengguna. Perhatikan perubahan warna drop zone yang menandakan asal kunci rahasia!
+            Seret dan jatuhkan <span class="underline font-bold">Kunci Publik</span>, <span class="underline font-bold">Ciphertext</span>, dan <span class="underline font-bold">IV</span>. Kolom tujuan akan berubah warna secara real-time!
         </p>
     </header>
 
@@ -23,8 +23,8 @@
                 <div class="flex items-center space-x-2.5 border-b border-[#e2e8f0] pb-3 mb-4">
                     <span class="p-2 bg-teal-50 rounded-lg text-[#14b8a6] font-bold text-lg">👩‍💻</span>
                     <div>
-                        <h2 class="text-base font-bold text-[#0f172a]">Pengirim (Alice)</h2>
-                        
+                        <h2 class="text-base font-bold text-[#0f172a]">Sisi Pengirim (Alice)</h2>
+                        <p class="text-[11px] text-[#64748b]">Mengelola kunci mandiri dan melakukan enkripsi data chat</p>
                     </div>
                 </div>
 
@@ -63,7 +63,7 @@
 
                 <div class="mt-4 pt-4 border-t border-[#e2e8f0]">
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
-                        Plaintext
+                        Pesan Teks Asli (Plaintext)
                     </label>
                     <textarea id="encryptPlaintext" rows="2" oninput="jalankanProsesEnkripsi()"
                         class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none text-xs text-[#0f172a] placeholder-[#94a3b8]" 
@@ -74,17 +74,19 @@
             <div class="pt-4 border-t border-[#e2e8f0] space-y-2">
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-[#64748b] mb-0.5">
-                        Hasil Enkripsi / Content <span class="text-emerald-600">(Salin ke Penerima)</span>
+                        Hasil Enkripsi / Ciphertext <span class="text-teal-600 font-semibold">(Seret ini ke Bob ➔)</span>
                     </label>
-                    <div id="encryptOutputCiphertext" class="p-2.5 bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white font-mono text-xs rounded-xl break-all min-h-[40px] flex items-center shadow-inner select-all cursor-pointer" title="Klik untuk menyalin">
+                    <div id="encryptOutputCiphertext" draggable="true" ondragstart="drag(event)" 
+                        class="p-2.5 bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white font-mono text-xs rounded-xl break-all min-h-[40px] flex items-center shadow-inner cursor-grab active:cursor-grabbing select-none transition-all" title="Seret kotak ini ke input AES Bob">
                         Menunggu nilai K cocok...
                     </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-[#64748b] mb-0.5">
-                        Initialization Vector / IV <span class="text-teal-600">(Salin ke Penerima)</span>
+                        Initialization Vector / IV <span class="text-teal-600 font-semibold">(Seret ini ke Bob ➔)</span>
                     </label>
-                    <div id="encryptOutputIV" class="p-2 bg-[#0f1720] text-[#e5e7eb] font-mono text-xs rounded-xl break-all min-h-[32px] flex items-center shadow-inner select-all cursor-pointer" title="Klik untuk menyalin">
+                    <div id="encryptOutputIV" draggable="true" ondragstart="drag(event)" 
+                        class="p-2 bg-[#0f1720] text-[#e5e7eb] font-mono text-xs rounded-xl break-all min-h-[32px] flex items-center shadow-inner cursor-grab active:cursor-grabbing select-none transition-all" title="Seret kotak ini ke input IV Bob">
                         Menunggu nilai K cocok...
                     </div>
                 </div>
@@ -96,7 +98,8 @@
                 <div class="flex items-center space-x-2.5 border-b border-[#e2e8f0] pb-3 mb-4">
                     <span class="p-2 bg-amber-50 rounded-lg text-amber-600 font-bold text-lg">👨‍💻</span>
                     <div>
-                        <h2 class="text-base font-bold text-[#0f172a]">Penerima (Bob)</h2>
+                        <h2 class="text-base font-bold text-[#0f172a]">Sisi Penerima (Bob)</h2>
+                        <p class="text-[11px] text-[#64748b]">Mengolah pertukaran kunci dan mendekripsi pesan rahasia</p>
                     </div>
                 </div>
 
@@ -134,22 +137,23 @@
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-[#e2e8f0] space-y-3">
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">Chipertext</label>
+                    <div id="cipherDropContainer" ondragover="allowDropCipher(event)" ondragleave="dragLeaveCipher(event)" ondrop="dropCiphertext(event)" class="p-2 border.5 border-dashed border-[#e2e8f0] rounded-xl bg-slate-50 transition-all duration-300">
+                        <label id="cipherLabel" class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">AES Encrypted Text (Drop Di Sini)</label>
                         <input type="text" id="decryptCiphertext" oninput="jalankanProsesDekripsi()"
-                            class="w-full p-2 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl text-xs font-mono" placeholder="Tempelkan content terenkripsi...">
+                            class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg text-xs font-mono transition-colors duration-300" placeholder="Tempelkan / jatuhkan content terenkripsi...">
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">Enter IV Used</label>
+                    
+                    <div id="ivDropContainer" ondragover="allowDropIV(event)" ondragleave="dragLeaveIV(event)" ondrop="dropIV(event)" class="p-2 border.5 border-dashed border-[#e2e8f0] rounded-xl bg-slate-50 transition-all duration-300">
+                        <label id="ivLabel" class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">Enter IV Used (Drop Di Sini)</label>
                         <input type="text" id="decryptIV" oninput="jalankanProsesDekripsi()"
-                            class="w-full p-2 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl text-xs font-mono" placeholder="Tempelkan IV pendamping...">
+                            class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg text-xs font-mono transition-colors duration-300" placeholder="Tempelkan / jatuhkan IV pendamping...">
                     </div>
                 </div>
             </div>
 
             <div class="mt-4 pt-4 border-t border-[#e2e8f0]">
                 <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
-                    AES Decrypted Output (Pesan Yang Dibongkar):
+                    AES Decrypted Output (Pesan Yang Pembongkar):
                 </label>
                 <div id="decryptOutputMessage" 
                     class="p-3 bg-[#f1f5f9] text-[#64748b] text-xs rounded-xl min-h-[60px] flex items-center justify-center text-center font-bold transition-all">
@@ -178,23 +182,36 @@
             generateDHBob();
         };
 
-        // --- SISTEM DRAG & DROP DENGAN WARNA REAKTIF BERLAWANAN ---
+        // --- SISTEM DRAG & DROP WARNA REAKTIF KONTRAST ---
         
-        // Ketika menyeret ke atas Drop Zone Alice, tampilkan warna orange (warna asal Bob)
         function allowDropAlice(ev) {
             ev.preventDefault();
-            const zone = document.getElementById('aliceDropZone');
-            zone.className = "border-2 border-dashed border-amber-400 bg-amber-50 p-4 rounded-xl text-center transition-all duration-300";
+            document.getElementById('aliceDropZone').className = "border-2 border-dashed border-amber-400 bg-amber-50 p-4 rounded-xl text-center transition-all duration-300";
         }
 
-        // Ketika menyeret ke atas Drop Zone Bob, tampilkan warna hijau (warna asal Alice)
         function allowDropBob(ev) {
             ev.preventDefault();
-            const zone = document.getElementById('bobDropZone');
-            zone.className = "border-2 border-dashed border-teal-400 bg-teal-50 p-4 rounded-xl text-center transition-all duration-300";
+            document.getElementById('bobDropZone').className = "border-2 border-dashed border-teal-400 bg-teal-50 p-4 rounded-xl text-center transition-all duration-300";
         }
 
-        // Kembalikan ke style dasar jika kursor keluar dari drop zone tanpa menjatuhkan elemen
+        // --- HOVER & LEAVE CIPHERTEXT CONTAINER ---
+        function allowDropCipher(ev) {
+            ev.preventDefault();
+            document.getElementById('cipherDropContainer').className = "p-2 border border-dashed border-teal-500 bg-teal-50 rounded-xl transition-all duration-300";
+        }
+        function dragLeaveCipher(ev) {
+            evaluasiWarnaDataInput();
+        }
+
+        // --- HOVER & LEAVE IV CONTAINER ---
+        function allowDropIV(ev) {
+            ev.preventDefault();
+            document.getElementById('ivDropContainer').className = "p-2 border border-dashed border-slate-800 bg-slate-100 rounded-xl transition-all duration-300";
+        }
+        function dragLeaveIV(ev) {
+            evaluasiWarnaDataInput();
+        }
+
         function dragLeave(ev) {
             evaluasiWarnaDropZone();
         }
@@ -204,6 +221,7 @@
             ev.dataTransfer.setData("sourceId", ev.target.id);
         }
 
+        // Drop Kunci Publik Bob ke Alice
         function dropAlice(ev) {
             ev.preventDefault();
             const data = ev.dataTransfer.getData("text/plain");
@@ -213,11 +231,12 @@
                 document.getElementById('aliceReceivedPublic').value = data;
                 hitungSharedKAlice();
             } else {
-                alert("Salah seret! Masukkan Kunci Publik milik BOB, bukan kunci milik sendiri.");
+                alert("Salah seret! Masukkan Kunci Publik milik BOB.");
                 evaluasiWarnaDropZone();
             }
         }
 
+        // Drop Kunci Publik Alice ke Bob
         function dropBob(ev) {
             ev.preventDefault();
             const data = ev.dataTransfer.getData("text/plain");
@@ -227,23 +246,55 @@
                 document.getElementById('bobReceivedPublic').value = data;
                 hitungSharedKBob();
             } else {
-                alert("Salah seret! Masukkan Kunci Publik milik ALICE, bukan kunci milik sendiri.");
+                alert("Salah seret! Masukkan Kunci Publik milik ALICE.");
                 evaluasiWarnaDropZone();
             }
         }
 
-        // Mengatur status warna drop zone secara statis setelah data berhasil masuk atau dihapus
+        // Handle drop untuk Ciphertext (Berubah jadi HIJAU sesuai elemen asal)
+        function dropCiphertext(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text/plain");
+            const sourceId = ev.dataTransfer.getData("sourceId");
+
+            if (sourceId === "encryptOutputCiphertext") {
+                if (data.includes("Menunggu")) return;
+                document.getElementById('decryptCiphertext').value = data;
+                evaluasiWarnaDataInput();
+                jalankanProsesDekripsi();
+            } else {
+                alert("Salah seret! Seret kotak 'Hasil Enkripsi / Ciphertext' dari Alice.");
+                evaluasiWarnaDataInput();
+            }
+        }
+
+        // Handle drop untuk IV (Berubah jadi HITAM sesuai elemen asal)
+        function dropIV(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text/plain");
+            const sourceId = ev.dataTransfer.getData("sourceId");
+
+            if (sourceId === "encryptOutputIV") {
+                if (data.includes("Menunggu")) return;
+                document.getElementById('decryptIV').value = data;
+                evaluasiWarnaDataInput();
+                jalankanProsesDekripsi();
+            } else {
+                alert("Salah seret! Seret kotak 'Initialization Vector / IV' dari Alice.");
+                evaluasiWarnaDataInput();
+            }
+        }
+
+        // Evaluasi Warna Dropzone Kunci (DH)
         function evaluasiWarnaDropZone() {
             const aliceInput = document.getElementById('aliceReceivedPublic').value.trim();
             const aliceZone = document.getElementById('aliceDropZone');
             const aliceLabel = document.getElementById('aliceDropLabel');
 
             if (aliceInput !== "") {
-                // Berhasil menerima kunci Bob -> Berubah permanen jadi Orange/Amber khas Bob
                 aliceZone.className = "border-2 border-solid border-amber-400 bg-amber-50/70 p-4 rounded-xl text-center transition-all duration-300";
                 aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-amber-800 mb-1 pointer-events-none";
             } else {
-                // Kosong -> Kembali ke abu-abu default
                 aliceZone.className = "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
                 aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
             }
@@ -253,13 +304,46 @@
             const bobLabel = document.getElementById('bobDropLabel');
 
             if (bobInput !== "") {
-                // Berhasil menerima kunci Alice -> Berubah permanen jadi Hijau/Teal khas Alice
                 bobZone.className = "border-2 border-solid border-teal-400 bg-teal-50/70 p-4 rounded-xl text-center transition-all duration-300";
                 bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-teal-800 mb-1 pointer-events-none";
             } else {
-                // Kosong -> Kembali ke abu-abu default
                 bobZone.className = "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
                 bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
+            }
+        }
+
+        // Evaluasi Warna Input Data Hasil Enkripsi & IV saat terisi
+        function evaluasiWarnaDataInput() {
+            const cipherVal = document.getElementById('decryptCiphertext').value.trim();
+            const cipherBox = document.getElementById('cipherDropContainer');
+            const cipherInput = document.getElementById('decryptCiphertext');
+            const cipherLabel = document.getElementById('cipherLabel');
+
+            if (cipherVal !== "") {
+                // Berubah Permanen Menjadi Tema Hijau Teal (Seperti tombol Ciphertext Alice)
+                cipherBox.className = "p-2 border border-solid border-teal-500 bg-gradient-to-r from-teal-500 to-emerald-600 rounded-xl transition-all duration-300";
+                cipherInput.className = "w-full p-2 bg-teal-900/40 border border-teal-400/30 rounded-lg text-xs font-mono text-white placeholder-teal-200/50 focus:outline-none";
+                cipherLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-white mb-1";
+            } else {
+                cipherBox.className = "p-2 border border-dashed border-[#e2e8f0] rounded-xl bg-slate-50 transition-all duration-300";
+                cipherInput.className = "w-full p-2 bg-white border border-[#e2e8f0] rounded-lg text-xs font-mono";
+                cipherLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1";
+            }
+
+            const ivVal = document.getElementById('decryptIV').value.trim();
+            const ivBox = document.getElementById('ivDropContainer');
+            const ivInput = document.getElementById('decryptIV');
+            const ivLabel = document.getElementById('ivLabel');
+
+            if (ivVal !== "") {
+                // Berubah Permanen Menjadi Tema Hitam / Gelap (Seperti tombol IV Alice)
+                ivBox.className = "p-2 border border-solid border-slate-900 bg-[#0f1720] rounded-xl transition-all duration-300";
+                ivInput.className = "w-full p-2 bg-slate-800/80 border border-slate-700 rounded-lg text-xs font-mono text-[#e5e7eb] placeholder-slate-500 focus:outline-none";
+                ivLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1";
+            } else {
+                ivBox.className = "p-2 border border-dashed border-[#e2e8f0] rounded-xl bg-slate-50 transition-all duration-300";
+                ivInput.className = "w-full p-2 bg-white border border-[#e2e8f0] rounded-lg text-xs font-mono";
+                ivLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1";
             }
         }
 
@@ -331,54 +415,42 @@
             jalankanProsesDekripsi(); 
         }
 
-        // --- VALIDATOR FEEDBACK TIGA KONDISI (DEFAULT, COCOK, INDIKATOR MERAH) ---
+        // --- VALIDATOR FEEDBACK TIGA KONDISI ---
         function evaluasiKesesuaianKunci() {
             const aliceCard = document.getElementById('aliceKCard');
             const bobCard = document.getElementById('bobKCard');
-            
             const aliceTitle = document.getElementById('aliceKTitle');
             const bobTitle = document.getElementById('bobKTitle');
-
             const aliceMatch = document.getElementById('aliceMatchBadge');
             const bobMatch = document.getElementById('bobMatchBadge');
-
             const aliceMismatch = document.getElementById('aliceMismatchBadge');
             const bobMismatch = document.getElementById('bobMismatchBadge');
 
             if (rawKAlice !== null && rawKBob !== null && rawKAlice === rawKBob) {
-                // KUNCI COCOK (HIJAU)
                 aliceCard.className = "p-3 bg-emerald-50 rounded-xl border border-emerald-400 text-center transition-all duration-300 shadow-xs";
                 bobCard.className = "p-3 bg-emerald-50 rounded-xl border border-emerald-400 text-center transition-all duration-300 shadow-xs";
-                
                 aliceTitle.className = "block text-[10px] uppercase font-bold text-emerald-800 mb-0.5";
                 bobTitle.className = "block text-[10px] uppercase font-bold text-emerald-800 mb-0.5";
-
                 aliceMatch.classList.remove('hidden');
                 bobMatch.classList.remove('hidden');
                 aliceMismatch.classList.add('hidden');
                 bobMismatch.classList.add('hidden');
             } 
             else if (rawKAlice !== null && rawKBob !== null && rawKAlice !== rawKBob) {
-                // KUNCI TIDAK COCOK (MERAH)
                 aliceCard.className = "p-3 bg-red-50 rounded-xl border border-red-300 text-center transition-all duration-300 shadow-xs";
                 bobCard.className = "p-3 bg-red-50 rounded-xl border border-red-300 text-center transition-all duration-300 shadow-xs";
-                
                 aliceTitle.className = "block text-[10px] uppercase font-bold text-red-800 mb-0.5";
                 bobTitle.className = "block text-[10px] uppercase font-bold text-red-800 mb-0.5";
-
                 aliceMatch.classList.add('hidden');
                 bobMatch.classList.add('hidden');
                 aliceMismatch.classList.remove('hidden');
                 bobMismatch.classList.remove('hidden');
             } 
             else {
-                // DEFAULT (ABU-ABU)
                 aliceCard.className = "p-3 bg-slate-100 rounded-xl border border-slate-200 text-center transition-all duration-300";
                 bobCard.className = "p-3 bg-slate-100 rounded-xl border border-slate-200 text-center transition-all duration-300";
-                
                 aliceTitle.className = "block text-[10px] uppercase font-bold text-slate-500 mb-0.5";
                 bobTitle.className = "block text-[10px] uppercase font-bold text-slate-500 mb-0.5";
-
                 aliceMatch.classList.add('hidden');
                 bobMatch.classList.add('hidden');
                 aliceMismatch.classList.add('hidden');
@@ -411,6 +483,8 @@
 
                 outputCipher.innerText = encrypted.toString();
                 outputIV.innerText = ivBase64;
+                
+                jalankanProsesDekripsi();
             } catch (e) {}
         }
 
@@ -459,14 +533,6 @@
             }
             return res;
         }
-
-        // Sistem Klik Salin Otomatis
-        document.getElementById('encryptOutputCiphertext').addEventListener('click', function() {
-            if(!this.innerText.includes('Menunggu')) { navigator.clipboard.writeText(this.innerText); alert('Ciphertext disalin!'); }
-        });
-        document.getElementById('encryptOutputIV').addEventListener('click', function() {
-            if(!this.innerText.includes('Menunggu')) { navigator.clipboard.writeText(this.innerText); alert('IV disalin!'); }
-        });
     </script>
 </body>
 </html>
