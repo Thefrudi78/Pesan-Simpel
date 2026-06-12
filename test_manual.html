@@ -3,134 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validator Dekripsi AES-256 (Kunci Base64 - CBC)</title>
+    <title>Playground Eksperimen AES-256-CBC (Base64 Mode)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-[#f1f5f9] text-[#0f172a] font-sans min-h-screen flex flex-col justify-between">
 
-    <header class="bg-slate-950 border-b border-slate-800 py-6 px-4 text-center shadow-lg">
-        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-emerald-400">?? AES Decryption Sandbox</h1>
-        <p class="text-slate-400 mt-2 text-xs md:text-sm max-w-2xl mx-auto">
-            Pembuktian Keamanan: Mendekripsi data chat rahasia secara mandiri menggunakan parameter kunci berbasis <span class="text-amber-400 font-semibold">Base64</span> dan mode <span class="text-blue-400 font-semibold">AES-256-CBC</span>.
+    <header class="bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-6 px-4 text-center shadow-md">
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">üß™ AES-256-CBC Cryptography Sandbox</h1>
+        <p class="text-teal-100 mt-1.5 text-xs md:text-sm max-w-2xl mx-auto font-medium">
+            Alat Uji Validasi Pengiriman & Penerimaan Pesan. Menggunakan format Kunci & IV berbasis <span class="underline font-bold">Base64</span> yang sinkron secara akurat dengan Framework Laravel.
         </p>
     </header>
 
-    <main class="max-w-3xl mx-auto px-4 py-8 w-full flex-grow flex items-center justify-center">
+    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 w-full flex-grow items-stretch">
         
-        <div class="bg-slate-850 p-6 md:p-8 rounded-2xl shadow-2xl border border-slate-700 w-full space-y-5">
-            
-            <div class="flex items-center space-x-3 border-b border-slate-700 pb-3">
-                <span class="text-2xl">??</span>
-                <h2 class="text-xl font-bold text-white">Sisi Dekripsi (Sesuai Spesifikasi Sistem)</h2>
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-[#e2e8f0] flex flex-col justify-between">
+            <div>
+                <div class="flex items-center space-x-2.5 border-b border-[#e2e8f0] pb-3 mb-5">
+                    <span class="p-2 bg-teal-50 rounded-lg text-[#14b8a6] font-bold text-lg">üîí</span>
+                    <div>
+                        <h2 class="text-base font-bold text-[#0f172a]">Sisi Enkripsi (Simulator Pengirim)</h2>
+                        <p class="text-[11px] text-[#64748b]">Menghasilkan Ciphertext & IV acak untuk disimpan ke Database</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
+                            Pesan Teks Asli (Plaintext)
+                        </label>
+                        <textarea id="encryptPlaintext" rows="3" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none text-sm text-[#0f172a] placeholder-[#94a3b8] transition-all" 
+                            placeholder="Ketik pesan rahasia yang ingin dikirim..."></textarea>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
+                                Kunci Rahasia / Secret Key <span class="text-[#0d9488]">(Format: Base64)</span>
+                            </label>
+                            <button type="button" onclick="generateKunciBaru()" 
+                                class="text-[11px] font-bold text-white bg-gradient-to-r from-[#14b8a6] to-[#0d9488] px-2.5 py-1 rounded-md shadow-xs hover:brightness-95 transition-all cursor-pointer">
+                                ‚ö° Generate Kunci
+                            </button>
+                        </div>
+                        <textarea id="encryptKey" rows="2" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none font-mono text-xs text-[#0f172a] placeholder-[#94a3b8] transition-all" 
+                            placeholder="Masukkan atau klik 'Generate Kunci' untuk membuat kunci 32-bytes otomatis..."></textarea>
+                    </div>
+                </div>
             </div>
 
-            <div class="space-y-4">
+            <div class="mt-6 pt-5 border-t border-[#e2e8f0] space-y-3">
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                        AES Encrypted Text <span class="text-emerald-400">(Base64 dari phpMyAdmin)</span>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">
+                        Hasil Enkripsi / Content <span class="text-emerald-600">(Simpan ke phpMyAdmin)</span>
                     </label>
-                    <textarea id="inputCiphertext" rows="3" 
-                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 text-slate-200 font-mono text-xs placeholder-slate-600 shadow-inner" 
-                        placeholder="Contoh: ZZx6TEmKPcV/ShJNqg11RQ=="></textarea>
+                    <div id="encryptOutputCiphertext" class="p-3 bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white font-mono text-xs rounded-xl break-all min-h-[50px] flex items-center shadow-inner select-all cursor-pointer" title="Klik untuk menyalin">
+                        Menunggu parameter diisi...
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                        Enter Secret Key used for Encryption <span class="text-amber-400">(Format: Base64)</span>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">
+                        Initialization Vector / IV <span class="text-teal-600">(Simpan ke phpMyAdmin)</span>
                     </label>
-                    <textarea id="keyDecrypt" rows="2" 
-                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 text-slate-200 font-mono text-xs placeholder-slate-600 shadow-inner" 
-                        placeholder="Contoh: yA5lxjTWBJi30plr1SyPSNS8NgTnZfHuuv9ddC/stNE="></textarea>
+                    <div id="encryptOutputIV" class="p-3 bg-[#0f1720] text-[#e5e7eb] font-mono text-xs rounded-xl break-all min-h-[40px] flex items-center shadow-inner select-all cursor-pointer" title="Klik untuk menyalin">
+                        Menunggu parameter diisi...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-[#e2e8f0] flex flex-col justify-between">
+            <div>
+                <div class="flex items-center space-x-2.5 border-b border-[#e2e8f0] pb-3 mb-5">
+                    <span class="p-2 bg-amber-50 rounded-lg text-amber-600 font-bold text-lg">üîì</span>
+                    <div>
+                        <h2 class="text-base font-bold text-[#0f172a]">Sisi Dekripsi (Penerima / Eksternal)</h2>
+                        <p class="text-[11px] text-[#64748b]">Membongkar pesan terenkripsi yang diambil dari Database</p>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                        Enter IV Used During Encryption <span class="text-blue-400">(Format: Base64)</span>
-                    </label>
-                    <input type="text" id="inputIV" 
-                        class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 text-slate-200 font-mono text-xs placeholder-slate-600 shadow-inner" 
-                        placeholder="Contoh: HUO3P/fJHawtHeAg88vghQ==">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
+                            AES Encrypted Text <span class="text-emerald-600">(Base64 dari phpMyAdmin)</span>
+                        </label>
+                        <textarea id="decryptCiphertext" rows="3" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-xs text-[#0f172a] placeholder-[#94a3b8] transition-all" 
+                            placeholder="Tempelkan data chat acak di sini..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
+                            Enter Secret Key used for Encryption <span class="text-amber-500">(Format: Base64)</span>
+                        </label>
+                        <textarea id="decryptKey" rows="2" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-xs text-[#0f172a] placeholder-[#94a3b8] transition-all" 
+                            placeholder="Tempelkan kunci rahasia bersama (Shared Key)..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
+                            Enter IV Used During Encryption <span class="text-blue-500">(Format: Base64)</span>
+                        </label>
+                        <input type="text" id="decryptIV" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-xs text-[#0f172a] placeholder-[#94a3b8] transition-all" 
+                            placeholder="Tempelkan data IV pendamping dari database...">
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] font-mono text-slate-400">
-                <div>ï Cipher Mode: <span class="text-slate-200 font-bold">CBC</span></div>
-                <div>ï Padding: <span class="text-slate-200 font-bold">PKCS7 (PKCS5)</span></div>
-                <div>ï Key Size: <span class="text-slate-200 font-bold">256 Bits</span></div>
-                <div>ï Output Format: <span class="text-emerald-400 font-bold">Plain-Text</span></div>
-            </div>
-
-            <div class="pt-4 border-t border-slate-700">
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <div class="mt-6 pt-5 border-t border-[#e2e8f0]">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-2">
                     AES Decrypted Output (Hasil Akhir):
                 </label>
-                <div id="decryptedOutput" 
-                    class="p-4 bg-slate-900 text-slate-500 text-sm rounded-xl min-h-[75px] border border-slate-700 flex items-center justify-center text-center transition-all duration-300 shadow-inner">
+                <div id="decryptOutputMessage" 
+                    class="p-4 bg-[#f1f5f9] text-[#64748b] text-sm rounded-xl min-h-[75px] border border-[#e2e8f0] flex items-center justify-center text-center transition-all duration-300 font-medium">
                     Menunggu parameter diisi lengkap...
                 </div>
             </div>
-
-        </div>
+        </section>
 
     </main>
 
-    <footer class="bg-slate-950 border-t border-slate-800 py-3 px-4 text-center text-xs text-slate-500">
-        Web Eksperimen Sukses Pembuktian ó Parameter Sinkron dengan Library Pendukung php-openssl.
+    <footer class="bg-[#0f1720] border-t border-slate-800 py-3.5 px-4 text-center text-xs text-[#94a3b8]">
+        Sistem Detektor Kriptografi Simetris ‚Äî Parameter Terbuka Terpadu 256-Bit.
     </footer>
 
     <script>
-        function prosesDekripsiSesuaiGambar() {
-            const ciphertextBase64 = document.getElementById('inputCiphertext').value.trim();
-            const keyBase64 = document.getElementById('keyDecrypt').value.trim();
-            const ivBase64 = document.getElementById('inputIV').value.trim();
+        // --- FUNGSI BARU: GENERATE KUNCI AES-256 (32 BYTES) SECARA ACAK AMAN ---
+        function generateKunciBaru() {
+            // Generate 32 bytes data acak (256-bit key)
+            const kataAcak = CryptoJS.lib.WordArray.random(32);
+            // Ubah menjadi format string Base64
+            const kunciBase64 = CryptoJS.enc.Base64.stringify(kataAcak);
             
-            const decryptOutput = document.getElementById('decryptedOutput');
+            // Masukkan ke kolom input kunci pengirim
+            document.getElementById('encryptKey').value = kunciBase64;
+            
+            // Jalankan ulang enkripsi otomatis jika kolom teks sudah terisi
+            jalankanProsesEnkripsi();
+        }
 
-            // Jika ada parameter yang belum diisi, stand-by
-            if (!ciphertextBase64 || !keyBase64 || !ivBase64) {
-                decryptOutput.innerText = "Menunggu parameter diisi lengkap...";
-                decryptOutput.className = "p-4 bg-slate-900 text-slate-500 text-sm rounded-xl min-h-[75px] border border-slate-700 flex items-center justify-center text-center shadow-inner";
+        // --- PROSES SISI KIRI: ENKRIPSI (REAL-TIME) ---
+        function jalankanProsesEnkripsi() {
+            const plaintext = document.getElementById('encryptPlaintext').value;
+            const keyBase64 = document.getElementById('encryptKey').value.trim();
+            
+            const outputCiphertext = document.getElementById('encryptOutputCiphertext');
+            const outputIV = document.getElementById('encryptOutputIV');
+
+            if (!plaintext || !keyBase64) {
+                outputCiphertext.innerText = "Menunggu parameter diisi...";
+                outputIV.innerText = "Menunggu parameter diisi...";
                 return;
             }
 
             try {
-                // 1. Parsing Kunci Rahasia dari format Base64 ke dalam WordArray (Byte)
+                // Parse kunci Base64 menjadi array byte
                 const parsedKey = CryptoJS.enc.Base64.parse(keyBase64);
+                
+                // Generate IV acak murni sepanjang 16-byte (128-bit)
+                const rawIV = CryptoJS.lib.WordArray.random(16);
+                const ivBase64 = CryptoJS.enc.Base64.stringify(rawIV);
 
-                // 2. Parsing IV dari format Base64 ke dalam WordArray (Byte)
-                const parsedIV = CryptoJS.enc.Base64.parse(ivBase64);
-
-                // 3. Eksekusi dekripsi simetris menggunakan algoritma AES-256-CBC
-                const decrypted = CryptoJS.AES.decrypt(ciphertextBase64, parsedKey, {
-                    iv: parsedIV,
+                // Eksekusi enkripsi AES-256-CBC
+                const encrypted = CryptoJS.AES.encrypt(plaintext, parsedKey, {
+                    iv: rawIV,
                     mode: CryptoJS.mode.CBC,
-                    padding: CryptoJS.pad.Pkcs7 // Pkcs7 di CryptoJS otomatis meng-cover spesifikasi PKCS5Padding
+                    padding: CryptoJS.pad.Pkcs7
                 });
 
-                // Convert bytes kembali menjadi string teks terbaca (UTF-8)
-                const plaintextResult = decrypted.toString(CryptoJS.enc.Utf8);
-
-                // 4. Validasi Penayangan Teks Hasil Pembongkaran
-                if (plaintextResult && plaintextResult.length > 0) {
-                    decryptOutput.innerText = plaintextResult;
-                    // Beri warna hijau emerald terang sebagai tanda sukses tembus
-                    decryptOutput.className = "p-4 bg-emerald-950/50 text-emerald-400 font-extrabold rounded-xl min-h-[75px] border border-emerald-500/40 flex items-center justify-center text-center text-lg tracking-wide shadow-[0_0_15px_rgba(16,185,129,0.1)]";
-                } else {
-                    throw new Error("Hasil dekripsi kosong/tidak valid");
-                }
+                // Cetak hasil ke layar komponen pengirim
+                outputCiphertext.innerText = encrypted.toString(); 
+                outputIV.innerText = ivBase64;
 
             } catch (error) {
-                // Tampilkan pesan error jika data kunci atau IV tidak sinkron satu sama lain
-                decryptOutput.innerText = "? Gagal Dekripsi! Kunci rahasia atau IV tidak cocok dengan data ciphertext tersebut.";
-                decryptOutput.className = "p-4 bg-red-950/40 text-red-400 font-semibold rounded-xl min-h-[75px] border border-red-500/30 flex items-center justify-center text-center text-xs";
+                outputCiphertext.innerText = "‚ùå Kesalahan Enkripsi (Kunci Tidak Valid)";
+                outputIV.innerText = "‚ùå Gagal mengolah byte IV";
             }
         }
 
-        // --- EVENT LISTENERS REAL-TIME ---
-        document.getElementById('inputCiphertext').addEventListener('input', prosesDekripsiSesuaiGambar);
-        document.getElementById('keyDecrypt').addEventListener('input', prosesDekripsiSesuaiGambar);
-        document.getElementById('inputIV').addEventListener('input', prosesDekripsiSesuaiGambar);
+        // --- PROSES SISI KANAN: DEKRIPSI (REAL-TIME) ---
+        function jalankanProsesDekripsi() {
+            const ciphertextBase64 = document.getElementById('decryptCiphertext').value.trim();
+            const keyBase64 = document.getElementById('decryptKey').value.trim();
+            const ivBase64 = document.getElementById('decryptIV').value.trim();
+            
+            const decryptOutput = document.getElementById('decryptOutputMessage');
+
+            if (!ciphertextBase64 || !keyBase64 || !ivBase64) {
+                decryptOutput.innerText = "Menunggu parameter diisi lengkap...";
+                decryptOutput.className = "p-4 bg-[#f1f5f9] text-[#64748b] text-sm rounded-xl min-h-[75px] border border-[#e2e8f0] flex items-center justify-center text-center font-medium";
+                return;
+            }
+
+            try {
+                const parsedKey = CryptoJS.enc.Base64.parse(keyBase64);
+                const parsedIV = CryptoJS.enc.Base64.parse(ivBase64);
+
+                const decrypted = CryptoJS.AES.decrypt(ciphertextBase64, parsedKey, {
+                    iv: parsedIV,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                });
+
+                const plaintextResult = decrypted.toString(CryptoJS.enc.Utf8);
+
+                if (plaintextResult && plaintextResult.length > 0) {
+                    decryptOutput.innerText = plaintextResult;
+                    decryptOutput.className = "p-4 bg-emerald-50 text-emerald-900 font-extrabold rounded-xl min-h-[75px] border border-emerald-300 flex items-center justify-center text-center text-base tracking-wide shadow-sm";
+                } else {
+                    throw new Error("Gagal uraikan padding");
+                }
+
+            } catch (error) {
+                decryptOutput.innerText = "‚ùå Gagal Dekripsi! Kunci rahasia atau IV tidak cocok dengan data ciphertext tersebut.";
+                decryptOutput.className = "p-4 bg-red-50 text-red-700 font-semibold rounded-xl min-h-[75px] border border-red-200 flex items-center justify-center text-center text-xs";
+            }
+        }
+
+        // --- SISTEM AUTOMATIC COPY CLICK ---
+        document.getElementById('encryptOutputCiphertext').addEventListener('click', function() {
+            if(this.innerText.includes('Menunggu')) return;
+            navigator.clipboard.writeText(this.innerText);
+            alert('Ciphertext berhasil disalin!');
+        });
+        document.getElementById('encryptOutputIV').addEventListener('click', function() {
+            if(this.innerText.includes('Menunggu')) return;
+            navigator.clipboard.writeText(this.innerText);
+            alert('IV berhasil disalin!');
+        });
+
+        // --- EVENT LISTENERS MONITORING DATA ---
+        document.getElementById('encryptPlaintext').addEventListener('input', jalankanProsesEnkripsi);
+        document.getElementById('encryptKey').addEventListener('input', jalankanProsesEnkripsi);
+        
+        document.getElementById('decryptCiphertext').addEventListener('input', jalankanProsesDekripsi);
+        document.getElementById('decryptKey').addEventListener('input', jalankanProsesDekripsi);
+        document.getElementById('decryptIV').addEventListener('input', jalankanProsesDekripsi);
     </script>
 </body>
 </html>
