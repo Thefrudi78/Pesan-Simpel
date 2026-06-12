@@ -459,8 +459,8 @@
             bobBadge.className = 'p-2 bg-amber-50 rounded-lg text-amber-600 font-bold text-lg id-badge-icon';
             bobBadge.innerText = '👨‍💻';
 
-            document.getElementById('aliceDropLabel').innerHTML = 'Jatuhkan <span class="highligh-term">Kunci Publik</span> Bob Di Sini';
-            document.getElementById('bobDropLabel').innerHTML = 'Jatuhkan <span class="highligh-term">Kunci Publik</span> Alice Di Sini';
+            document.getElementById('aliceDropLabel').innerHTML = 'Jatuhkan <span class="highlight-term">Kunci Publik</span> Bob Di Sini';
+            document.getElementById('bobDropLabel').innerHTML = 'Jatuhkan <span class="highlight-term">Kunci Publik</span> Alice Di Sini';
 
             document.getElementById('labelCipherOutput').innerHTML =
                 '<span class="highlight-term">Chipertext</span> <span class="text-teal-600 font-semibold text-[9px] btn-hideable">(Seret ini ke Bob ➔)</span>';
@@ -803,80 +803,66 @@
 
     function evaluasiWarnaDropZone() {
         const aliceInput = document.getElementById('aliceReceivedPublic').value.trim();
+        const bobInput = document.getElementById('bobReceivedPublic').value.trim();
+        
+        // Kunci publik asli lawan (string)
+        const bobRealPub = document.getElementById('bobPublicDisplay').innerText;
+        const aliceRealPub = document.getElementById('alicePublicDisplay').innerText;
+
+        // Apakah input sama dengan kunci asli lawan?
+        const aliceValidKey = aliceInput !== "" && parseInt(aliceInput) === parseInt(bobRealPub);
+        const bobValidKey = bobInput !== "" && parseInt(bobInput) === parseInt(aliceRealPub);
+
         const aliceZone = document.getElementById('aliceDropZone');
         const aliceLabel = document.getElementById('aliceDropLabel');
         const aliceField = document.getElementById('aliceReceivedPublic');
-
-        if (aliceInput !== "") {
-            if (isRealSystemMode) {
-                aliceZone.className =
-                    "border border-solid border-[#1e293b] bg-[#0c1524] p-4 rounded-xl text-center shadow-inner transition-all duration-300";
-                aliceLabel.className =
-                    "block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 pointer-events-none";
-                aliceField.className =
-                    "w-full p-2 bg-[#030712] border border-slate-900 rounded-lg font-mono text-sm text-center text-slate-300 focus:outline-none";
-            } else {
-                aliceZone.className =
-                    "border border-solid border-amber-400 bg-[#ff9800] p-4 rounded-xl text-center shadow-md transition-all duration-300";
-                aliceLabel.className =
-                    "block text-[11px] font-black uppercase tracking-wider text-amber-950 mb-1 pointer-events-none";
-                aliceField.className =
-                    "w-full p-2 bg-white border border-amber-600 rounded-lg font-mono text-sm text-center font-bold focus:outline-none text-amber-950 shadow-inner";
-            }
-        } else {
-            if (isRealSystemMode) {
-                aliceZone.className =
-                    "border border-dashed border-slate-800 bg-[#060b13] p-4 rounded-xl text-center transition-all duration-300";
-                aliceLabel.className =
-                    "block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1 pointer-events-none";
-                aliceField.className =
-                    "w-full p-2 bg-[#030712] border border-slate-950 rounded-lg font-mono text-sm text-center text-slate-800 focus:outline-none";
-            } else {
-                aliceZone.className =
-                    "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
-                aliceLabel.className =
-                    "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
-                aliceField.className =
-                    "w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#14b8a6]";
-            }
-        }
-
-        const bobInput = document.getElementById('bobReceivedPublic').value.trim();
         const bobZone = document.getElementById('bobDropZone');
         const bobLabel = document.getElementById('bobDropLabel');
         const bobField = document.getElementById('bobReceivedPublic');
 
-        if (bobInput !== "") {
+        // --- Alice Drop Zone ---
+        if (aliceValidKey) {
             if (isRealSystemMode) {
-                bobZone.className =
-                    "border border-solid border-[#1e293b] bg-[#0c1524] p-4 rounded-xl text-center shadow-inner transition-all duration-300";
-                bobLabel.className =
-                    "block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 pointer-events-none";
-                bobField.className =
-                    "w-full p-2 bg-[#030712] border border-slate-900 rounded-lg font-mono text-sm text-center text-slate-300 focus:outline-none";
+                aliceZone.className = "border border-solid border-[#1e293b] bg-[#0c1524] p-4 rounded-xl text-center shadow-inner transition-all duration-300";
+                aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 pointer-events-none";
+                aliceField.className = "w-full p-2 bg-[#030712] border border-slate-900 rounded-lg font-mono text-sm text-center text-slate-300 focus:outline-none";
             } else {
-                bobZone.className =
-                    "border border-solid border-teal-500 bg-[#00a67e] p-4 rounded-xl text-center shadow-md transition-all duration-300";
-                bobLabel.className =
-                    "block text-[11px] font-black uppercase tracking-wider text-teal-950 mb-1 pointer-events-none";
-                bobField.className =
-                    "w-full p-2 bg-white border border-teal-600 rounded-lg font-mono text-sm text-center font-bold focus:outline-none text-teal-950 shadow-inner";
+                aliceZone.className = "border border-solid border-amber-400 bg-[#ff9800] p-4 rounded-xl text-center shadow-md transition-all duration-300";
+                aliceLabel.className = "block text-[11px] font-black uppercase tracking-wider text-amber-950 mb-1 pointer-events-none";
+                aliceField.className = "w-full p-2 bg-white border border-amber-600 rounded-lg font-mono text-sm text-center font-bold focus:outline-none text-amber-950 shadow-inner";
             }
         } else {
             if (isRealSystemMode) {
-                bobZone.className =
-                    "border border-dashed border-slate-800 bg-[#060b13] p-4 rounded-xl text-center transition-all duration-300";
-                bobLabel.className =
-                    "block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1 pointer-events-none";
-                bobField.className =
-                    "w-full p-2 bg-[#030712] border border-slate-950 rounded-lg font-mono text-sm text-center text-slate-800 focus:outline-none";
+                aliceZone.className = "border border-dashed border-slate-800 bg-[#060b13] p-4 rounded-xl text-center transition-all duration-300";
+                aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1 pointer-events-none";
+                aliceField.className = "w-full p-2 bg-[#030712] border border-slate-950 rounded-lg font-mono text-sm text-center text-slate-800 focus:outline-none";
             } else {
-                bobZone.className =
-                    "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
-                bobLabel.className =
-                    "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
-                bobField.className =
-                    "w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-sm text-center focus:outline-none focus:ring-1 focus:ring-amber-500";
+                aliceZone.className = "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
+                aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
+                aliceField.className = "w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#14b8a6]";
+            }
+        }
+
+        // --- Bob Drop Zone ---
+        if (bobValidKey) {
+            if (isRealSystemMode) {
+                bobZone.className = "border border-solid border-[#1e293b] bg-[#0c1524] p-4 rounded-xl text-center shadow-inner transition-all duration-300";
+                bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 pointer-events-none";
+                bobField.className = "w-full p-2 bg-[#030712] border border-slate-900 rounded-lg font-mono text-sm text-center text-slate-300 focus:outline-none";
+            } else {
+                bobZone.className = "border border-solid border-teal-500 bg-[#00a67e] p-4 rounded-xl text-center shadow-md transition-all duration-300";
+                bobLabel.className = "block text-[11px] font-black uppercase tracking-wider text-teal-950 mb-1 pointer-events-none";
+                bobField.className = "w-full p-2 bg-white border border-teal-600 rounded-lg font-mono text-sm text-center font-bold focus:outline-none text-teal-950 shadow-inner";
+            }
+        } else {
+            if (isRealSystemMode) {
+                bobZone.className = "border border-dashed border-slate-800 bg-[#060b13] p-4 rounded-xl text-center transition-all duration-300";
+                bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1 pointer-events-none";
+                bobField.className = "w-full p-2 bg-[#030712] border border-slate-950 rounded-lg font-mono text-sm text-center text-slate-800 focus:outline-none";
+            } else {
+                bobZone.className = "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
+                bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
+                bobField.className = "w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-sm text-center focus:outline-none focus:ring-1 focus:ring-amber-500";
             }
         }
     }
