@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Sederhana Diffie-Hellman & AES-256-CBC</title>
+    <title>Simulasi Interaktif Diffie-Hellman & AES-256-CBC</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
-<body class="bg-[#f1f5f9] text-[#0f172a] font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-[#f1f5f9] text-[#0f172a] font-sans min-h-screen flex flex-col justify-between select-none">
 
     <header class="bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-6 px-4 text-center shadow-md">
-        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">🧪 Simulasi Kriptografi: Diffie-Hellman & AES</h1>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">🧪 Playground Interaktif: Diffie-Hellman & AES</h1>
         <p class="text-teal-100 mt-1.5 text-xs md:text-sm max-w-3xl mx-auto font-medium">
-            Konsep Sederhana: Memisahkan Kunci Publik & Privat Menggunakan <span class="underline font-bold">Angka Bulat Kecil</span> untuk Mempermudah Pemahaman Alur Kerja Keamanan.
+            Seret dan jatuhkan <span class="underline font-bold">Kunci Publik</span> antar pengguna. Perhatikan perubahan warna drop zone yang menandakan asal kunci rahasia!
         </p>
     </header>
 
@@ -23,8 +23,8 @@
                 <div class="flex items-center space-x-2.5 border-b border-[#e2e8f0] pb-3 mb-4">
                     <span class="p-2 bg-teal-50 rounded-lg text-[#14b8a6] font-bold text-lg">👩‍💻</span>
                     <div>
-                        <h2 class="text-base font-bold text-[#0f172a]">Sisi Pengirim (Alice)</h2>
-                        <p class="text-[11px] text-[#64748b]">Mengelola kunci mandiri dan melakukan enkripsi data chat</p>
+                        <h2 class="text-base font-bold text-[#0f172a]">Pengirim (Alice)</h2>
+                        
                     </div>
                 </div>
 
@@ -38,30 +38,32 @@
                         <input type="number" id="alicePrivate" oninput="hitungPublikAlice()" class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-xs focus:ring-1 focus:ring-[#14b8a6] focus:outline-none text-[#0f172a]" min="2" max="50">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Alice (Bagikan ke Bob):</label>
-                        <div id="alicePublicDisplay" class="p-2 bg-teal-50 border border-teal-200 rounded-lg font-mono text-sm text-[#0d9488] select-all cursor-pointer font-black text-center" title="Klik untuk menyalin">Menghitung...</div>
+                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Alice <span class="text-teal-600 font-semibold">(Seret ini ke Bob ➔)</span>:</label>
+                        <div id="alicePublicDisplay" draggable="true" ondragstart="drag(event)" class="p-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 border border-teal-600 rounded-lg font-mono text-sm text-white select-none cursor-grab active:cursor-grabbing font-black text-center shadow-xs active:scale-98 transition-all" title="Seret kotak ini ke area drop Bob">Menghitung...</div>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">
-                            Masukkan Kunci Publik dari Bob / Penerima (Hanya Angka):
+                    <div id="aliceDropZone" ondragover="allowDropAlice(event)" ondragleave="dragLeave(event)" ondrop="dropAlice(event)" class="border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300">
+                        <label id="aliceDropLabel" class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none">
+                            Jatuhkan Kunci Publik Bob Di Sini
                         </label>
                         <input type="number" id="aliceReceivedPublic" oninput="hitungSharedKAlice()" 
-                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none font-mono text-sm placeholder-[#94a3b8]" 
-                            placeholder="Contoh masukan angka publik Bob...">
+                            class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#14b8a6]" 
+                            placeholder="...atau ketik manual di sini">
                     </div>
 
-                    <div class="p-3 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-xl border border-teal-200 text-center">
-                        <span class="block text-[10px] uppercase font-bold text-teal-800 mb-0.5">Hasil Nilai K (Shared Secret Alice):</span>
-                        <div id="aliceKDisplay" class="font-mono text-2xl text-[#0d9488] font-black tracking-wider">?</div>
+                    <div id="aliceKCard" class="p-3 bg-slate-100 rounded-xl border border-slate-200 text-center transition-all duration-300">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500 mb-0.5" id="aliceKTitle">Hasil Nilai K (Shared Secret Alice):</span>
+                        <div id="aliceKDisplay" class="font-mono text-2xl text-slate-600 font-black tracking-wider">?</div>
+                        <div id="aliceMatchBadge" class="hidden text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">🔒 Kunci Cocok!</div>
+                        <div id="aliceMismatchBadge" class="hidden text-[10px] font-bold text-red-600 uppercase tracking-widest mt-0.5">❌ Kunci Tidak Cocok!</div>
                     </div>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-[#e2e8f0]">
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1.5">
-                        Pesan Teks Asli (Plaintext)
+                        Plaintext
                     </label>
                     <textarea id="encryptPlaintext" rows="2" oninput="jalankanProsesEnkripsi()"
                         class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none text-xs text-[#0f172a] placeholder-[#94a3b8]" 
@@ -94,8 +96,7 @@
                 <div class="flex items-center space-x-2.5 border-b border-[#e2e8f0] pb-3 mb-4">
                     <span class="p-2 bg-amber-50 rounded-lg text-amber-600 font-bold text-lg">👨‍💻</span>
                     <div>
-                        <h2 class="text-base font-bold text-[#0f172a]">Sisi Penerima (Bob)</h2>
-                        <p class="text-[11px] text-[#64748b]">Mengolah pertukaran kunci dan mendekripsi pesan rahasia</p>
+                        <h2 class="text-base font-bold text-[#0f172a]">Penerima (Bob)</h2>
                     </div>
                 </div>
 
@@ -109,30 +110,32 @@
                         <input type="number" id="bobPrivate" oninput="hitungPublikBob()" class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none text-[#0f172a]" min="2" max="50">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Bob (Bagikan ke Alice):</label>
-                        <div id="bobPublicDisplay" class="p-2 bg-amber-50 border border-amber-200 rounded-lg font-mono text-sm text-amber-700 select-all cursor-pointer font-black text-center" title="Klik untuk menyalin">Menghitung...</div>
+                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Bob <span class="text-amber-600 font-semibold">(🖰 Seret ini ke Alice)</span>:</label>
+                        <div id="bobPublicDisplay" draggable="true" ondragstart="drag(event)" class="p-2.5 bg-gradient-to-r from-amber-500 to-orange-600 border border-orange-600 rounded-lg font-mono text-sm text-white select-none cursor-grab active:cursor-grabbing font-black text-center shadow-xs active:scale-98 transition-all" title="Seret kotak ini ke area drop Alice">Menghitung...</div>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">
-                            Masukkan Kunci Publik dari Alice / Pengirim (Hanya Angka):
+                    <div id="bobDropZone" ondragover="allowDropBob(event)" ondragleave="dragLeave(event)" ondrop="dropBob(event)" class="border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300">
+                        <label id="bobDropLabel" class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none">
+                            Jatuhkan Kunci Publik Alice Di Sini
                         </label>
                         <input type="number" id="bobReceivedPublic" oninput="hitungSharedKBob()" 
-                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-sm placeholder-[#94a3b8]" 
-                            placeholder="Contoh masukan angka publik Alice...">
+                            class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-sm text-center focus:outline-none focus:ring-1 focus:ring-amber-500" 
+                            placeholder="...atau ketik manual di sini">
                     </div>
 
-                    <div class="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 text-center">
-                        <span class="block text-[10px] uppercase font-bold text-amber-800 mb-0.5">Hasil Nilai K (Shared Secret Bob):</span>
-                        <div id="bobKDisplay" class="font-mono text-2xl text-amber-700 font-black tracking-wider">?</div>
+                    <div id="bobKCard" class="p-3 bg-slate-100 rounded-xl border border-slate-200 text-center transition-all duration-300">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500 mb-0.5" id="bobKTitle">Hasil Nilai K (Shared Secret Bob):</span>
+                        <div id="bobKDisplay" class="font-mono text-2xl text-slate-600 font-black tracking-wider">?</div>
+                        <div id="bobMatchBadge" class="hidden text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">🔒 Kunci Cocok!</div>
+                        <div id="bobMismatchBadge" class="hidden text-[10px] font-bold text-red-600 uppercase tracking-widest mt-0.5">❌ Kunci Tidak Cocok!</div>
                     </div>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-[#e2e8f0] space-y-3">
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">AES Encrypted Text</label>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">Chipertext</label>
                         <input type="text" id="decryptCiphertext" oninput="jalankanProsesDekripsi()"
                             class="w-full p-2 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl text-xs font-mono" placeholder="Tempelkan content terenkripsi...">
                     </div>
@@ -162,22 +165,106 @@
     </footer>
 
     <script>
-        // Menggunakan pangkalan matematika bilangan prima kecil (Generator G = 5, Prime P = 97)
         const G = 5;
         const P = 97;
 
-        // Variabel global penyimpan kunci rahasia murni (K) dalam bentuk biner ter-hash untuk engine AES
         let aliceSecretAESKey = null;
         let bobSecretAESKey = null;
+        let rawKAlice = null;
+        let rawKBob = null;
 
         window.onload = function() {
             generateDHAlice();
             generateDHBob();
         };
 
+        // --- SISTEM DRAG & DROP DENGAN WARNA REAKTIF BERLAWANAN ---
+        
+        // Ketika menyeret ke atas Drop Zone Alice, tampilkan warna orange (warna asal Bob)
+        function allowDropAlice(ev) {
+            ev.preventDefault();
+            const zone = document.getElementById('aliceDropZone');
+            zone.className = "border-2 border-dashed border-amber-400 bg-amber-50 p-4 rounded-xl text-center transition-all duration-300";
+        }
+
+        // Ketika menyeret ke atas Drop Zone Bob, tampilkan warna hijau (warna asal Alice)
+        function allowDropBob(ev) {
+            ev.preventDefault();
+            const zone = document.getElementById('bobDropZone');
+            zone.className = "border-2 border-dashed border-teal-400 bg-teal-50 p-4 rounded-xl text-center transition-all duration-300";
+        }
+
+        // Kembalikan ke style dasar jika kursor keluar dari drop zone tanpa menjatuhkan elemen
+        function dragLeave(ev) {
+            evaluasiWarnaDropZone();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text/plain", ev.target.innerText);
+            ev.dataTransfer.setData("sourceId", ev.target.id);
+        }
+
+        function dropAlice(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text/plain");
+            const sourceId = ev.dataTransfer.getData("sourceId");
+
+            if (sourceId === "bobPublicDisplay") {
+                document.getElementById('aliceReceivedPublic').value = data;
+                hitungSharedKAlice();
+            } else {
+                alert("Salah seret! Masukkan Kunci Publik milik BOB, bukan kunci milik sendiri.");
+                evaluasiWarnaDropZone();
+            }
+        }
+
+        function dropBob(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text/plain");
+            const sourceId = ev.dataTransfer.getData("sourceId");
+
+            if (sourceId === "alicePublicDisplay") {
+                document.getElementById('bobReceivedPublic').value = data;
+                hitungSharedKBob();
+            } else {
+                alert("Salah seret! Masukkan Kunci Publik milik ALICE, bukan kunci milik sendiri.");
+                evaluasiWarnaDropZone();
+            }
+        }
+
+        // Mengatur status warna drop zone secara statis setelah data berhasil masuk atau dihapus
+        function evaluasiWarnaDropZone() {
+            const aliceInput = document.getElementById('aliceReceivedPublic').value.trim();
+            const aliceZone = document.getElementById('aliceDropZone');
+            const aliceLabel = document.getElementById('aliceDropLabel');
+
+            if (aliceInput !== "") {
+                // Berhasil menerima kunci Bob -> Berubah permanen jadi Orange/Amber khas Bob
+                aliceZone.className = "border-2 border-solid border-amber-400 bg-amber-50/70 p-4 rounded-xl text-center transition-all duration-300";
+                aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-amber-800 mb-1 pointer-events-none";
+            } else {
+                // Kosong -> Kembali ke abu-abu default
+                aliceZone.className = "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
+                aliceLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
+            }
+
+            const bobInput = document.getElementById('bobReceivedPublic').value.trim();
+            const bobZone = document.getElementById('bobDropZone');
+            const bobLabel = document.getElementById('bobDropLabel');
+
+            if (bobInput !== "") {
+                // Berhasil menerima kunci Alice -> Berubah permanen jadi Hijau/Teal khas Alice
+                bobZone.className = "border-2 border-solid border-teal-400 bg-teal-50/70 p-4 rounded-xl text-center transition-all duration-300";
+                bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-teal-800 mb-1 pointer-events-none";
+            } else {
+                // Kosong -> Kembali ke abu-abu default
+                bobZone.className = "border-2 border-dashed border-[#e2e8f0] bg-[#f1f5f9] p-4 rounded-xl text-center transition-all duration-300";
+                bobLabel.className = "block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1 pointer-events-none";
+            }
+        }
+
         // --- MANAJEMEN KUNCI ALICE (KIRI) ---
         function generateDHAlice() {
-            // Berikan nilai acak kecil berkisar puluhan (3 - 30) agar mudah dipahami
             document.getElementById('alicePrivate').value = Math.floor(Math.random() * 25) + 3;
             hitungPublikAlice();
         }
@@ -195,16 +282,18 @@
             if (isNaN(inputBobPub)) {
                 display.innerText = "?";
                 aliceSecretAESKey = null;
+                rawKAlice = null;
+                evaluasiKesesuaianKunci();
+                evaluasiWarnaDropZone();
                 return;
             }
 
-            // Hitung nilai K (Angka bulat puluhan)
-            const k = powMod(inputBobPub, priv, P);
-            display.innerText = k; // Langsung tampilkan angka bulat polos!
+            rawKAlice = powMod(inputBobPub, priv, P);
+            display.innerText = rawKAlice; 
+            aliceSecretAESKey = CryptoJS.SHA256(rawKAlice.toString()).toString(CryptoJS.enc.Base64);
             
-            // Di balik layar, ubah angka bulat ini menjadi bentuk Hash SHA-256 agar menjadi kunci 32-bytes yang sah untuk AES-256
-            aliceSecretAESKey = CryptoJS.SHA256(k.toString()).toString(CryptoJS.enc.Base64);
-            
+            evaluasiKesesuaianKunci();
+            evaluasiWarnaDropZone();
             jalankanProsesEnkripsi(); 
         }
 
@@ -227,23 +316,79 @@
             if (isNaN(inputAlicePub)) {
                 display.innerText = "?";
                 bobSecretAESKey = null;
+                rawKBob = null;
+                evaluasiKesesuaianKunci();
+                evaluasiWarnaDropZone();
                 return;
             }
 
-            // Hitung nilai K (Angka bulat puluhan)
-            const k = powMod(inputAlicePub, priv, P);
-            display.innerText = k; // Langsung tampilkan angka bulat polos!
+            rawKBob = powMod(inputAlicePub, priv, P);
+            display.innerText = rawKBob; 
+            bobSecretAESKey = CryptoJS.SHA256(rawKBob.toString()).toString(CryptoJS.enc.Base64);
             
-            // Di balik layar, ubah angka bulat ini menjadi bentuk Hash SHA-256 agar menjadi kunci 32-bytes yang sah untuk AES-256
-            bobSecretAESKey = CryptoJS.SHA256(k.toString()).toString(CryptoJS.enc.Base64);
-            
+            evaluasiKesesuaianKunci();
+            evaluasiWarnaDropZone();
             jalankanProsesDekripsi(); 
         }
 
-        // --- CORE ENKRIPSI & DEKRIPSI AES SINKRONISASI ---
+        // --- VALIDATOR FEEDBACK TIGA KONDISI (DEFAULT, COCOK, INDIKATOR MERAH) ---
+        function evaluasiKesesuaianKunci() {
+            const aliceCard = document.getElementById('aliceKCard');
+            const bobCard = document.getElementById('bobKCard');
+            
+            const aliceTitle = document.getElementById('aliceKTitle');
+            const bobTitle = document.getElementById('bobKTitle');
+
+            const aliceMatch = document.getElementById('aliceMatchBadge');
+            const bobMatch = document.getElementById('bobMatchBadge');
+
+            const aliceMismatch = document.getElementById('aliceMismatchBadge');
+            const bobMismatch = document.getElementById('bobMismatchBadge');
+
+            if (rawKAlice !== null && rawKBob !== null && rawKAlice === rawKBob) {
+                // KUNCI COCOK (HIJAU)
+                aliceCard.className = "p-3 bg-emerald-50 rounded-xl border border-emerald-400 text-center transition-all duration-300 shadow-xs";
+                bobCard.className = "p-3 bg-emerald-50 rounded-xl border border-emerald-400 text-center transition-all duration-300 shadow-xs";
+                
+                aliceTitle.className = "block text-[10px] uppercase font-bold text-emerald-800 mb-0.5";
+                bobTitle.className = "block text-[10px] uppercase font-bold text-emerald-800 mb-0.5";
+
+                aliceMatch.classList.remove('hidden');
+                bobMatch.classList.remove('hidden');
+                aliceMismatch.classList.add('hidden');
+                bobMismatch.classList.add('hidden');
+            } 
+            else if (rawKAlice !== null && rawKBob !== null && rawKAlice !== rawKBob) {
+                // KUNCI TIDAK COCOK (MERAH)
+                aliceCard.className = "p-3 bg-red-50 rounded-xl border border-red-300 text-center transition-all duration-300 shadow-xs";
+                bobCard.className = "p-3 bg-red-50 rounded-xl border border-red-300 text-center transition-all duration-300 shadow-xs";
+                
+                aliceTitle.className = "block text-[10px] uppercase font-bold text-red-800 mb-0.5";
+                bobTitle.className = "block text-[10px] uppercase font-bold text-red-800 mb-0.5";
+
+                aliceMatch.classList.add('hidden');
+                bobMatch.classList.add('hidden');
+                aliceMismatch.classList.remove('hidden');
+                bobMismatch.classList.remove('hidden');
+            } 
+            else {
+                // DEFAULT (ABU-ABU)
+                aliceCard.className = "p-3 bg-slate-100 rounded-xl border border-slate-200 text-center transition-all duration-300";
+                bobCard.className = "p-3 bg-slate-100 rounded-xl border border-slate-200 text-center transition-all duration-300";
+                
+                aliceTitle.className = "block text-[10px] uppercase font-bold text-slate-500 mb-0.5";
+                bobTitle.className = "block text-[10px] uppercase font-bold text-slate-500 mb-0.5";
+
+                aliceMatch.classList.add('hidden');
+                bobMatch.classList.add('hidden');
+                aliceMismatch.classList.add('hidden');
+                bobMismatch.classList.add('hidden');
+            }
+        }
+
+        // --- ENGINE ENKRIPSI & DEKRIPSI AES-256-CBC ---
         function jalankanProsesEnkripsi() {
             const plaintext = document.getElementById('encryptPlaintext').value;
-            
             const outputCipher = document.getElementById('encryptOutputCiphertext');
             const outputIV = document.getElementById('encryptOutputIV');
 
@@ -299,12 +444,11 @@
                     throw new Error();
                 }
             } catch (error) {
-                outputBox.innerText = "❌ Gagal Dekripsi! Nilai K salah atau parameter data tidak cocok.";
+                outputBox.innerText = "❌ Gagal Dekripsi! Kunci salah atau data tidak cocok.";
                 outputBox.className = "p-3 bg-red-50 text-red-700 font-semibold rounded-xl min-h-[60px] border border-red-200 flex items-center justify-center text-center text-xs";
             }
         }
 
-        // Fungsi Matematika Pembantu: (Base^Exp) % Mod secara efisien
         function powMod(base, exp, mod) {
             let res = 1;
             base = base % mod;
@@ -316,13 +460,7 @@
             return res;
         }
 
-        // Fungsi Klik Otomatis untuk Menyalin
-        document.getElementById('alicePublicDisplay').addEventListener('click', function() {
-            navigator.clipboard.writeText(this.innerText); alert('Kunci Publik Alice disalin: ' + this.innerText);
-        });
-        document.getElementById('bobPublicDisplay').addEventListener('click', function() {
-            navigator.clipboard.writeText(this.innerText); alert('Kunci Publik Bob disalin: ' + this.innerText);
-        });
+        // Sistem Klik Salin Otomatis
         document.getElementById('encryptOutputCiphertext').addEventListener('click', function() {
             if(!this.innerText.includes('Menunggu')) { navigator.clipboard.writeText(this.innerText); alert('Ciphertext disalin!'); }
         });
