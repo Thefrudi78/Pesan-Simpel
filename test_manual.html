@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Diffie-Hellman & AES-256-CBC Playground</title>
+    <title>Simulasi Sederhana Diffie-Hellman & AES-256-CBC</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body class="bg-[#f1f5f9] text-[#0f172a] font-sans min-h-screen flex flex-col justify-between">
 
     <header class="bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-6 px-4 text-center shadow-md">
-        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">🧪 Simulasi Kriptografi: Diffie-Hellman & AES-256</h1>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">🧪 Simulasi Kriptografi: Diffie-Hellman & AES</h1>
         <p class="text-teal-100 mt-1.5 text-xs md:text-sm max-w-3xl mx-auto font-medium">
-            Membuktikan bagaimana proses pertukaran kunci publik menghasilkan <span class="underline font-bold">Nilai K (Shared Secret) yang sama</span> di kedua sisi untuk mengunci & membuka pesan secara simetris.
+            Konsep Sederhana: Memisahkan Kunci Publik & Privat Menggunakan <span class="underline font-bold">Angka Bulat Kecil</span> untuk Mempermudah Pemahaman Alur Kerja Keamanan.
         </p>
     </header>
 
@@ -30,32 +30,32 @@
 
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-[#e2e8f0] space-y-3 mb-4">
                     <div class="flex justify-between items-center">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">🔑 Keypair Diffie-Hellman Alice</span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">🔑 Kunci Diffie-Hellman Alice</span>
                         <button onclick="generateDHAlice()" class="text-[10px] font-bold bg-white text-[#0d9488] border border-[#e2e8f0] px-2 py-0.5 rounded shadow-2xs hover:bg-slate-100 cursor-pointer">🔄 Acak Baru</button>
                     </div>
                     <div>
-                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Privat Alice (Rahasia, Bisa Diedit):</label>
-                        <input type="text" id="alicePrivate" oninput="hitungPublikAlice()" class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-xs focus:ring-1 focus:ring-[#14b8a6] focus:outline-none text-[#0f172a]">
+                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Privat Alice (Angka Rahasia Mandiri):</label>
+                        <input type="number" id="alicePrivate" oninput="hitungPublikAlice()" class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-xs focus:ring-1 focus:ring-[#14b8a6] focus:outline-none text-[#0f172a]" min="2" max="50">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Alice (Siap Dikirim / Dikopi):</label>
-                        <div id="alicePublicDisplay" class="p-2 bg-teal-50 border border-teal-200 rounded-lg font-mono text-xs text-[#0d9488] select-all cursor-pointer font-bold break-all" title="Klik untuk menyalin">Menghitung...</div>
+                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Alice (Bagikan ke Bob):</label>
+                        <div id="alicePublicDisplay" class="p-2 bg-teal-50 border border-teal-200 rounded-lg font-mono text-sm text-[#0d9488] select-all cursor-pointer font-black text-center" title="Klik untuk menyalin">Menghitung...</div>
                     </div>
                 </div>
 
                 <div class="space-y-3">
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">
-                            Masukkan Kunci Publik dari Bob / Penerima:
+                            Masukkan Kunci Publik dari Bob / Penerima (Hanya Angka):
                         </label>
-                        <input type="text" id="aliceReceivedPublic" oninput="hitungSharedKAlice()" 
-                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none font-mono text-xs placeholder-[#94a3b8]" 
-                            placeholder="Tempelkan Kunci Publik Bob di sini...">
+                        <input type="number" id="aliceReceivedPublic" oninput="hitungSharedKAlice()" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-[#14b8a6] focus:outline-none font-mono text-sm placeholder-[#94a3b8]" 
+                            placeholder="Contoh masukan angka publik Bob...">
                     </div>
 
-                    <div class="p-3 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-xl border border-teal-200">
-                        <span class="block text-[10px] uppercase font-bold text-teal-800 mb-1">Hasil Akhir Nilai K (Shared Secret Alice):</span>
-                        <div id="aliceKDisplay" class="font-mono text-xs text-[#0d9488] font-black break-all">Menunggu Kunci Publik Bob...</div>
+                    <div class="p-3 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-xl border border-teal-200 text-center">
+                        <span class="block text-[10px] uppercase font-bold text-teal-800 mb-0.5">Hasil Nilai K (Shared Secret Alice):</span>
+                        <div id="aliceKDisplay" class="font-mono text-2xl text-[#0d9488] font-black tracking-wider">?</div>
                     </div>
                 </div>
 
@@ -72,18 +72,18 @@
             <div class="pt-4 border-t border-[#e2e8f0] space-y-2">
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-[#64748b] mb-0.5">
-                        Hasil Enkripsi / Content <span class="text-emerald-600">(Kopi ke Penerima / phpMyAdmin)</span>
+                        Hasil Enkripsi / Content <span class="text-emerald-600">(Salin ke Penerima)</span>
                     </label>
                     <div id="encryptOutputCiphertext" class="p-2.5 bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white font-mono text-xs rounded-xl break-all min-h-[40px] flex items-center shadow-inner select-all cursor-pointer" title="Klik untuk menyalin">
-                        Menunggu nilai K valid...
+                        Menunggu nilai K cocok...
                     </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-[#64748b] mb-0.5">
-                        Initialization Vector / IV <span class="text-teal-600">(Kopi ke Penerima / phpMyAdmin)</span>
+                        Initialization Vector / IV <span class="text-teal-600">(Salin ke Penerima)</span>
                     </label>
                     <div id="encryptOutputIV" class="p-2 bg-[#0f1720] text-[#e5e7eb] font-mono text-xs rounded-xl break-all min-h-[32px] flex items-center shadow-inner select-all cursor-pointer" title="Klik untuk menyalin">
-                        Menunggu nilai K valid...
+                        Menunggu nilai K cocok...
                     </div>
                 </div>
             </div>
@@ -101,32 +101,32 @@
 
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-[#e2e8f0] space-y-3 mb-4">
                     <div class="flex justify-between items-center">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">🔑 Keypair Diffie-Hellman Bob</span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-[#64748b]">🔑 Kunci Diffie-Hellman Bob</span>
                         <button onclick="generateDHBob()" class="text-[10px] font-bold bg-white text-amber-700 border border-[#e2e8f0] px-2 py-0.5 rounded shadow-2xs hover:bg-slate-100 cursor-pointer">🔄 Acak Baru</button>
                     </div>
                     <div>
-                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Privat Bob (Rahasia, Bisa Diedit):</label>
-                        <input type="text" id="bobPrivate" oninput="hitungPublikBob()" class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none text-[#0f172a]">
+                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Privat Bob (Angka Rahasia Mandiri):</label>
+                        <input type="number" id="bobPrivate" oninput="hitungPublikBob()" class="w-full p-2 bg-white border border-[#e2e8f0] rounded-lg font-mono text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none text-[#0f172a]" min="2" max="50">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Bob (Siap Dikirim / Dikopi):</label>
-                        <div id="bobPublicDisplay" class="p-2 bg-amber-50 border border-amber-200 rounded-lg font-mono text-xs text-amber-700 select-all cursor-pointer font-bold break-all" title="Klik untuk menyalin">Menghitung...</div>
+                        <label class="block text-[10px] text-[#64748b] mb-1">Kunci Publik Bob (Bagikan ke Alice):</label>
+                        <div id="bobPublicDisplay" class="p-2 bg-amber-50 border border-amber-200 rounded-lg font-mono text-sm text-amber-700 select-all cursor-pointer font-black text-center" title="Klik untuk menyalin">Menghitung...</div>
                     </div>
                 </div>
 
                 <div class="space-y-3">
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-wider text-[#64748b] mb-1">
-                            Masukkan Kunci Publik dari Alice / Pengirim:
+                            Masukkan Kunci Publik dari Alice / Pengirim (Hanya Angka):
                         </label>
-                        <input type="text" id="bobReceivedPublic" oninput="hitungSharedKBob()" 
-                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-xs placeholder-[#94a3b8]" 
-                            placeholder="Tempelkan Kunci Publik Alice di sini...">
+                        <input type="number" id="bobReceivedPublic" oninput="hitungSharedKBob()" 
+                            class="w-full p-2.5 bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-sm placeholder-[#94a3b8]" 
+                            placeholder="Contoh masukan angka publik Alice...">
                     </div>
 
-                    <div class="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
-                        <span class="block text-[10px] uppercase font-bold text-amber-800 mb-1">Hasil Akhir Nilai K (Shared Secret Bob):</span>
-                        <div id="bobKDisplay" class="font-mono text-xs text-amber-700 font-black break-all">Menunggu Kunci Publik Alice...</div>
+                    <div class="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 text-center">
+                        <span class="block text-[10px] uppercase font-bold text-amber-800 mb-0.5">Hasil Nilai K (Shared Secret Bob):</span>
+                        <div id="bobKDisplay" class="font-mono text-2xl text-amber-700 font-black tracking-wider">?</div>
                     </div>
                 </div>
 
@@ -150,7 +150,7 @@
                 </label>
                 <div id="decryptOutputMessage" 
                     class="p-3 bg-[#f1f5f9] text-[#64748b] text-xs rounded-xl min-h-[60px] flex items-center justify-center text-center font-bold transition-all">
-                    Menunggu Nilai K & Parameter Masukan Lengkap...
+                    Belum Ada Kunci K Yang Saling Cocok
                 </div>
             </div>
         </section>
@@ -158,100 +158,103 @@
     </main>
 
     <footer class="bg-[#0f1720] border-t border-slate-800 py-3 px-4 text-center text-xs text-[#94a3b8]">
-        Simulasi Pertukaran Kunci Asimetris (DH) Terpadu Sistem Enkripsi Simetris (AES-256-CBC).
+        Simulasi Edukasi Diffie-Hellman Angka Bulat Sederhana (Modulus Prima 97).
     </footer>
 
     <script>
-        // Menggunakan Modulus Bilangan Prima Kecil (Generator 5, Prime 97) demi kestabilan kalkulasi real-time tanpa library BigInt yang rumit
+        // Menggunakan pangkalan matematika bilangan prima kecil (Generator G = 5, Prime P = 97)
         const G = 5;
         const P = 97;
 
-        // Inisialisasi awal saat halaman dibuka
+        // Variabel global penyimpan kunci rahasia murni (K) dalam bentuk biner ter-hash untuk engine AES
+        let aliceSecretAESKey = null;
+        let bobSecretAESKey = null;
+
         window.onload = function() {
             generateDHAlice();
             generateDHBob();
         };
 
-        // --- MANAJEMEN KUNCI ALICE ---
+        // --- MANAJEMEN KUNCI ALICE (KIRI) ---
         function generateDHAlice() {
-            document.getElementById('alicePrivate').value = Math.floor(Math.random() * 20) + 3;
+            // Berikan nilai acak kecil berkisar puluhan (3 - 30) agar mudah dipahami
+            document.getElementById('alicePrivate').value = Math.floor(Math.random() * 25) + 3;
             hitungPublikAlice();
         }
         function hitungPublikAlice() {
             const priv = parseInt(document.getElementById('alicePrivate').value) || 0;
-            // Rumus dasar DH: (G^priv) % P
             const pub = powMod(G, priv, P);
-            document.getElementById('alicePublicDisplay').innerText = "PUB-ALICE-" + pub + "X97";
-            hitungSharedKAlice(); // Hitung ulang jika ada perubahan kunci privat secara live
+            document.getElementById('alicePublicDisplay').innerText = pub;
+            hitungSharedKAlice(); 
         }
         function hitungSharedKAlice() {
             const priv = parseInt(document.getElementById('alicePrivate').value) || 0;
-            const inputBobPub = document.getElementById('aliceReceivedPublic').value.trim();
+            const inputBobPub = parseInt(document.getElementById('aliceReceivedPublic').value.trim());
             const display = document.getElementById('aliceKDisplay');
 
-            if (!inputBobPub || !inputBobPub.includes("PUB-BOB-")) {
-                display.innerText = "Menunggu Kunci Publik Bob...";
+            if (isNaN(inputBobPub)) {
+                display.innerText = "?";
+                aliceSecretAESKey = null;
                 return;
             }
 
-            // Ekstrak angka kunci publik lawan
-            const bobPubReal = parseInt(inputBobPub.replace("PUB-BOB-", "").replace("X97", "")) || 0;
-            // Hitung nilai K: (BobPub ^ AlicePriv) % P
-            const k = powMod(bobPubReal, priv, P);
+            // Hitung nilai K (Angka bulat puluhan)
+            const k = powMod(inputBobPub, priv, P);
+            display.innerText = k; // Langsung tampilkan angka bulat polos!
             
-            // Konversi nilai K menjadi representasi string Base64 yang valid untuk AES-256
-            const base64Key = CryptoJS.enc.Base64.stringify(CryptoJS.SHA256(k.toString()));
-            display.innerText = base64Key;
+            // Di balik layar, ubah angka bulat ini menjadi bentuk Hash SHA-256 agar menjadi kunci 32-bytes yang sah untuk AES-256
+            aliceSecretAESKey = CryptoJS.SHA256(k.toString()).toString(CryptoJS.enc.Base64);
             
-            jalankanProsesEnkripsi(); // Triger enkripsi otomatis jika K terbentuk
+            jalankanProsesEnkripsi(); 
         }
 
-        // --- MANAJEMEN KUNCI BOB ---
+        // --- MANAJEMEN KUNCI BOB (KANAN) ---
         function generateDHBob() {
-            document.getElementById('bobPrivate').value = Math.floor(Math.random() * 20) + 3;
+            document.getElementById('bobPrivate').value = Math.floor(Math.random() * 25) + 3;
             hitungPublikBob();
         }
         function hitungPublikBob() {
             const priv = parseInt(document.getElementById('bobPrivate').value) || 0;
             const pub = powMod(G, priv, P);
-            document.getElementById('bobPublicDisplay').innerText = "PUB-BOB-" + pub + "X97";
+            document.getElementById('bobPublicDisplay').innerText = pub;
             hitungSharedKBob();
         }
         function hitungSharedKBob() {
             const priv = parseInt(document.getElementById('bobPrivate').value) || 0;
-            const inputAlicePub = document.getElementById('bobReceivedPublic').value.trim();
+            const inputAlicePub = parseInt(document.getElementById('bobReceivedPublic').value.trim());
             const display = document.getElementById('bobKDisplay');
 
-            if (!inputAlicePub || !inputAlicePub.includes("PUB-ALICE-")) {
-                display.innerText = "Menunggu Kunci Publik Alice...";
+            if (isNaN(inputAlicePub)) {
+                display.innerText = "?";
+                bobSecretAESKey = null;
                 return;
             }
 
-            const alicePubReal = parseInt(inputAlicePub.replace("PUB-ALICE-", "").replace("X97", "")) || 0;
-            const k = powMod(alicePubReal, priv, P);
+            // Hitung nilai K (Angka bulat puluhan)
+            const k = powMod(inputAlicePub, priv, P);
+            display.innerText = k; // Langsung tampilkan angka bulat polos!
             
-            const base64Key = CryptoJS.enc.Base64.stringify(CryptoJS.SHA256(k.toString()));
-            display.innerText = base64Key;
+            // Di balik layar, ubah angka bulat ini menjadi bentuk Hash SHA-256 agar menjadi kunci 32-bytes yang sah untuk AES-256
+            bobSecretAESKey = CryptoJS.SHA256(k.toString()).toString(CryptoJS.enc.Base64);
             
-            jalankanProsesDekripsi(); // Triger dekripsi otomatis jika K terbentuk
+            jalankanProsesDekripsi(); 
         }
 
         // --- CORE ENKRIPSI & DEKRIPSI AES SINKRONISASI ---
         function jalankanProsesEnkripsi() {
             const plaintext = document.getElementById('encryptPlaintext').value;
-            const keyBase64 = document.getElementById('aliceKDisplay').innerText;
             
             const outputCipher = document.getElementById('encryptOutputCiphertext');
             const outputIV = document.getElementById('encryptOutputIV');
 
-            if (!plaintext || keyBase64.includes("Menunggu") || !keyBase64) {
-                outputCipher.innerText = "Menunggu parameter diisi...";
-                outputIV.innerText = "Menunggu parameter diisi...";
+            if (!plaintext || !aliceSecretAESKey) {
+                outputCipher.innerText = "Menunggu nilai K cocok...";
+                outputIV.innerText = "Menunggu nilai K cocok...";
                 return;
             }
 
             try {
-                const parsedKey = CryptoJS.enc.Base64.parse(keyBase64);
+                const parsedKey = CryptoJS.enc.Base64.parse(aliceSecretAESKey);
                 const rawIV = CryptoJS.lib.WordArray.random(16);
                 const ivBase64 = CryptoJS.enc.Base64.stringify(rawIV);
 
@@ -263,25 +266,22 @@
 
                 outputCipher.innerText = encrypted.toString();
                 outputIV.innerText = ivBase64;
-            } catch (e) {
-                // Fail-safe
-            }
+            } catch (e) {}
         }
 
         function jalankanProsesDekripsi() {
             const ciphertext = document.getElementById('decryptCiphertext').value.trim();
             const ivBase64 = document.getElementById('decryptIV').value.trim();
-            const keyBase64 = document.getElementById('bobKDisplay').innerText;
             const outputBox = document.getElementById('decryptOutputMessage');
 
-            if (!ciphertext || !ivBase64 || keyBase64.includes("Menunggu") || !keyBase64) {
-                outputBox.innerText = "Menunggu Kunci K & Parameter Masukan Lengkap...";
+            if (!ciphertext || !ivBase64 || !bobSecretAESKey) {
+                outputBox.innerText = "Belum Ada Kunci K Yang Saling Cocok";
                 outputBox.className = "p-3 bg-[#f1f5f9] text-[#64748b] text-xs rounded-xl min-h-[60px] flex items-center justify-center text-center font-bold border border-[#e2e8f0]";
                 return;
             }
 
             try {
-                const parsedKey = CryptoJS.enc.Base64.parse(keyBase64);
+                const parsedKey = CryptoJS.enc.Base64.parse(bobSecretAESKey);
                 const parsedIV = CryptoJS.enc.Base64.parse(ivBase64);
 
                 const decrypted = CryptoJS.AES.decrypt(ciphertext, parsedKey, {
@@ -299,7 +299,7 @@
                     throw new Error();
                 }
             } catch (error) {
-                outputBox.innerText = "❌ Gagal Dekripsi! Nilai K Anda salah atau parameter data tidak cocok.";
+                outputBox.innerText = "❌ Gagal Dekripsi! Nilai K salah atau parameter data tidak cocok.";
                 outputBox.className = "p-3 bg-red-50 text-red-700 font-semibold rounded-xl min-h-[60px] border border-red-200 flex items-center justify-center text-center text-xs";
             }
         }
@@ -318,10 +318,10 @@
 
         // Fungsi Klik Otomatis untuk Menyalin
         document.getElementById('alicePublicDisplay').addEventListener('click', function() {
-            navigator.clipboard.writeText(this.innerText); alert('Kunci Publik Alice disalin!');
+            navigator.clipboard.writeText(this.innerText); alert('Kunci Publik Alice disalin: ' + this.innerText);
         });
         document.getElementById('bobPublicDisplay').addEventListener('click', function() {
-            navigator.clipboard.writeText(this.innerText); alert('Kunci Publik Bob disalin!');
+            navigator.clipboard.writeText(this.innerText); alert('Kunci Publik Bob disalin: ' + this.innerText);
         });
         document.getElementById('encryptOutputCiphertext').addEventListener('click', function() {
             if(!this.innerText.includes('Menunggu')) { navigator.clipboard.writeText(this.innerText); alert('Ciphertext disalin!'); }
