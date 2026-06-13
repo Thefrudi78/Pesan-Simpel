@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DH & AES • Simulasi Pertukaran Kunci</title>
+  <title>DH & AES • Komponen Independen 50:50</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
@@ -65,12 +65,6 @@
     .public-drop-flash-alice { background: linear-gradient(135deg, #14b8a6, #0d9488) !important; color: white !important; transition: all 0.15s; }
     .public-drop-flash-bob { background: linear-gradient(135deg, #f59e0b, #ea580c) !important; color: white !important; transition: all 0.15s; }
     
-    /* LAYOUT SIMETRIS UNTUK KUNCI DH */
-    .dh-key-row { display: flex; align-items: flex-end; gap: 1rem; justify-content: space-between; flex-wrap: wrap; }
-    .dh-private { flex: 1; min-width: 130px; }
-    .dh-public { flex: 1; text-align: center; min-width: 130px; }
-    .dh-button { flex: 0; }
-    
     /* KALKULATOR K — 2 kolom horizontal + hasil di bawah */
     .k-calc-horizontal {
       display: flex;
@@ -117,15 +111,66 @@
     .toast-error { background-color: #dc2626; }
     .toast-success { background-color: #10b981; }
     
-    .big-icon { font-size: 1.5rem; }
-
-    /* Mode penyadap: elemen yang tetap jelas */
-    .eavesdrop-clear {
-      filter: none !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      box-shadow: 0 0 0 2px #ff4444, 0 0 0 4px #ffaa00 !important;
-      z-index: 100 !important;
+    /* Gaya untuk setiap card independen */
+    .indep-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .dark-mode .indep-card {
+      background: #0f172a;
+      border-color: #334155;
+    }
+    /* Header card kecil */
+    .card-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+    }
+    .dark-mode .card-header-title {
+      border-bottom-color: #334155;
+    }
+    /* Layout horizontal 50:50 untuk dua card (privat & publik) */
+    .two-cols-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    /* Agar konten dalam card tidak overflow */
+    .two-cols-grid .indep-card {
+      margin: 0;
+    }
+    /* Tombol acak kecil */
+    .btn-random {
+      background-color: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 9999px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.65rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      line-height: 1;
+    }
+    .btn-random:hover {
+      background-color: #e2e8f0;
+    }
+    .dark-mode .btn-random {
+      background-color: #1e293b;
+      border-color: #475569;
+      color: #cbd5e1;
+    }
+    .dark-mode .btn-random:hover {
+      background-color: #334155;
     }
   </style>
 </head>
@@ -142,42 +187,59 @@
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-  <!-- ==================== ALICE (KIRI) ==================== -->
-  <div id="aliceCardContainer" class="bg-white p-5 rounded-2xl shadow-md border border-[#e2e8f0] transition-all">
-    <div class="flex items-center gap-3 border-b pb-3 mb-4">
-      <span id="aliceBadgeIcon" class="text-3xl">👩‍💻</span>
-      <div>
-        <h2 id="aliceTitleSide" class="font-bold text-lg">Pengirim (Alice)</h2>
-        <p id="aliceSubSide" class="text-xs text-slate-500">enkripsi & kirim pesan</p>
-      </div>
-    </div>
-
-    <!-- KUNCI DIFFIE-HELLMAN ALICE -->
-    <div class="bg-slate-50 p-4 rounded-xl border mb-5">
-      <div class="flex items-center gap-2 mb-3"><span class="text-teal-600 text-lg">🔑</span><span class="font-bold text-teal-800">Kunci Diffie-Hellman Alice</span></div>
-      <div class="dh-key-row">
-        <div class="dh-private">
-          <label class="block text-xs font-bold text-slate-700 mb-1"><span class="highlight-badge">Kunci Privat Alice</span> <span class="text-teal-600 ml-1">(drag)</span></label>
-          <input type="number" id="alicePrivate" draggable="true" ondragstart="dragPrivateKey(event)" class="w-full p-2 bg-white border rounded-lg text-center font-mono text-sm cursor-grab shadow-sm">
-        </div>
-        <div class="dh-public">
-          <label class="block text-xs font-bold text-slate-700 mb-1"><span class="highlight-badge">Kunci Publik Alice</span> <span class="text-teal-600">(drag ke kanan)</span></label>
-          <div id="alicePublicDisplay" draggable="true" ondragstart="drag(event)" class="p-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-lg text-center font-bold text-lg cursor-grab shadow-md">-</div>
-        </div>
-        <div class="dh-button">
-          <button onclick="generateDHAlice()" class="mt-5 text-xs bg-white border px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">🔄 Acak Baru</button>
+  <!-- KOLOM KIRI (ALICE) -->
+  <div class="flex flex-col gap-5">
+    <!-- Card Header Alice -->
+    <div class="indep-card">
+      <div class="flex items-center gap-3">
+        <span id="aliceBadgeIcon" class="text-3xl">👩‍💻</span>
+        <div>
+          <h2 id="aliceTitleSide" class="font-bold text-lg">Pengirim (Alice)</h2>
+          <p id="aliceSubSide" class="text-xs text-slate-500">enkripsi & kirim pesan</p>
         </div>
       </div>
     </div>
 
-    <!-- KALKULATOR K (2 kolom horizontal + hasil di bawah) -->
-    <div class="mt-4 border-t border-teal-200 pt-4">
-      <div class="flex items-center gap-2 mb-3"><span class="text-teal-600 text-lg">🧮</span><span class="font-bold text-teal-800">Kalkulator K (Shared Secret)</span></div>
+    <!-- Dua container: Kunci Privat + Kunci Publik berdampingan 50:50 (Alice: Privat kiri, Publik kanan) -->
+    <div class="two-cols-grid">
+      <!-- Card Kunci Privat Alice -->
+      <div class="indep-card">
+        <div class="card-header-title">
+          <div class="flex items-center gap-2">
+            <span class="text-teal-600 text-lg">🔒</span>
+            <span class="font-bold text-teal-800 highlight-badge">Kunci Privat Alice</span>
+          </div>
+          <button onclick="generateDHAlice()" class="btn-random">🔄 Acak</button>
+        </div>
+        <div>
+          <!-- <label class="block text-xs font-bold text-slate-700 mb-1"><span class="highlight-badge">Kunci Privat</span> <span class="text-teal-600 ml-1">(drag)</span></label> -->
+          <input type="number" id="alicePrivate" draggable="true" ondragstart="dragPrivateKey(event)" oninput="updatePublicKeyFromPrivate('alice')" class="w-full p-2 bg-white border rounded-lg text-center font-mono text-sm cursor-grab shadow-sm">
+        </div>
+      </div>
+
+      <!-- Card Kunci Publik Alice -->
+      <div class="indep-card" id="alicePublicCard">
+        <div class="card-header-title">
+          <div class="flex items-center gap-2">
+            <span class="text-teal-600 text-lg">🌐</span>
+            <span class="highlight-badge" id="alicePubBadge">Kunci Publik Alice</span>
+          </div>
+          <span class="text-teal-600 text-xs">(drag ke kanan)</span>
+        </div>
+        <div id="alicePublicDisplay" draggable="true" ondragstart="drag(event)" class="p-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-lg text-center font-bold text-lg cursor-grab shadow-md">-</div>
+      </div>
+    </div>
+
+    <!-- Card Kalkulator K Alice -->
+    <div class="indep-card">
+      <div class="card-header-title">
+        
+        <span class="font-bold text-teal-800">Menghitung Nilai K (Alice)</span>
+      </div>
       <div class="k-calc-horizontal">
         <div class="k-input-row">
           <div>
-            <label class="text-xs font-bold flex items-center gap-1"><span class="highlight-badge">🔒 Private Anda</span> <span class="text-slate-500 text-[10px]">(drag/ketik)</span></label>
+            <label class="text-xs font-bold flex items-center gap-1"><span class="highlight-badge">🔒 Kunci Privat Alice</span> <span class="text-slate-500 text-[10px]">(drag/ketik)</span></label>
             <input type="number" id="aliceManualPrivate" placeholder="kosong" oninput="hitungManualK('alice')"
                    ondragover="allowDropOnInput(event)" ondragleave="dragLeaveInput(event)" ondrop="dropOnInput(event,'alice','private')"
                    class="w-full p-2 border rounded-lg text-sm">
@@ -190,7 +252,7 @@
           </div>
         </div>
         <div class="k-result">
-          <div class="text-xs font-bold text-teal-700 uppercase tracking-wide">Nilai K (Shared Secret Alice)</div>
+          <div class="text-xs font-bold text-teal-700 uppercase tracking-wide">Nilai K (Alice)</div>
           <div id="aliceManualKDisplay" draggable="true" ondragstart="dragManualK(event,'alice')" class="text-3xl font-black text-teal-800 cursor-grab my-1">?</div>
           <div class="flex justify-center gap-3 mt-1">
             <div id="aliceMatchBadge" class="hidden text-xs font-bold text-emerald-600">🔒 Kunci Cocok!</div>
@@ -200,40 +262,59 @@
       </div>
     </div>
 
-    <div id="aliceBottomSlot" class="mt-6 pt-4 border-t"></div>
+    <!-- Slot untuk menempatkan modul enkripsi -->
+    <div id="aliceBottomSlot"></div>
   </div>
 
-  <!-- ==================== BOB (KANAN) ==================== -->
-  <div id="bobCardContainer" class="bg-white p-5 rounded-2xl shadow-md border border-[#e2e8f0] transition-all">
-    <div class="flex items-center gap-3 border-b pb-3 mb-4">
-      <span id="bobBadgeIcon" class="text-3xl">👨‍💻</span>
-      <div>
-        <h2 id="bobTitleSide" class="font-bold text-lg">Penerima (Bob)</h2>
-        <p id="bobSubSide" class="text-xs text-slate-500">terima & dekripsi pesan</p>
-      </div>
-    </div>
-
-    <!-- KUNCI DIFFIE-HELLMAN BOB -->
-    <div class="bg-slate-50 p-4 rounded-xl border mb-5">
-      <div class="flex items-center gap-2 mb-3"><span class="text-amber-600 text-lg">🔑</span><span class="font-bold text-amber-800">Kunci Diffie-Hellman Bob</span></div>
-      <div class="dh-key-row" style="flex-direction: row-reverse; justify-content: space-between;">
-        <div class="dh-private" style="text-align: right;">
-          <label class="block text-xs font-bold text-slate-700 mb-1"><span class="highlight-badge">Kunci Privat Bob</span> <span class="text-amber-600">(drag)</span></label>
-          <input type="number" id="bobPrivate" draggable="true" ondragstart="dragPrivateKey(event)" class="w-full p-2 bg-white border rounded-lg text-center font-mono text-sm cursor-grab shadow-sm">
-        </div>
-        <div class="dh-public">
-          <label class="block text-xs font-bold text-slate-700 mb-1"><span class="highlight-badge">Kunci Publik Bob</span> <span class="text-amber-600">(drag ke kiri)</span></label>
-          <div id="bobPublicDisplay" draggable="true" ondragstart="drag(event)" class="p-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg text-center font-bold text-lg cursor-grab shadow-md">-</div>
-        </div>
-        <div class="dh-button">
-          <button onclick="generateDHBob()" class="mt-5 text-xs bg-white border px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">🔄 Acak Baru</button>
+  <!-- KOLOM KANAN (BOB) - URUTAN DITUKAR: PUBLIK DI KIRI, PRIVAT DI KANAN -->
+  <div class="flex flex-col gap-5">
+    <!-- Card Header Bob -->
+    <div class="indep-card">
+      <div class="flex items-center gap-3">
+        <span id="bobBadgeIcon" class="text-3xl">👨‍💻</span>
+        <div>
+          <h2 id="bobTitleSide" class="font-bold text-lg">Penerima (Bob)</h2>
+          <p id="bobSubSide" class="text-xs text-slate-500">terima & dekripsi pesan</p>
         </div>
       </div>
     </div>
 
-    <!-- KALKULATOR K (2 kolom horizontal + hasil di bawah) -->
-    <div class="mt-4 border-t border-amber-200 pt-4">
-      <div class="flex items-center gap-2 mb-3"><span class="text-amber-600 text-lg">🧮</span><span class="font-bold text-amber-800">Kalkulator K (Shared Secret)</span></div>
+    <!-- Dua container: Kunci Publik (kiri) + Kunci Privat (kanan) -->
+    <div class="two-cols-grid">
+      <!-- Card Kunci Publik Bob (sekarang di kiri) -->
+      <div class="indep-card" id="bobPublicCard">
+        <div class="card-header-title">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-600 text-lg">🌐</span>
+            <span class="highlight-badge" id="bobPubBadge">Kunci Publik Bob</span>
+          </div>
+          <span class="text-amber-600 text-xs">(drag ke kiri)</span>
+        </div>
+        <div id="bobPublicDisplay" draggable="true" ondragstart="drag(event)" class="p-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg text-center font-bold text-lg cursor-grab shadow-md">-</div>
+      </div>
+
+      <!-- Card Kunci Privat Bob (sekarang di kanan) -->
+      <div class="indep-card">
+        <div class="card-header-title">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-600 text-lg">🔒</span>
+            <span class="font-bold text-amber-800 highlight-badge">Kunci Privat Bob</span>
+          </div>
+          <button onclick="generateDHBob()" class="btn-random">🔄 Acak</button>
+        </div>
+        <div>
+          <!-- <label class="block text-xs font-bold text-slate-700 mb-1"><span class="highlight-badge">Kunci Privat</span> <span class="text-amber-600 ml-1">(drag)</span></label> -->
+          <input type="number" id="bobPrivate" draggable="true" ondragstart="dragPrivateKey(event)" oninput="updatePublicKeyFromPrivate('bob')" class="w-full p-2 bg-white border rounded-lg text-center font-mono text-sm cursor-grab shadow-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Kalkulator K Bob -->
+    <div class="indep-card">
+      <div class="card-header-title">
+        
+        <span class="font-bold text-amber-800">Menghitung Nilai K (Bob)</span>
+      </div>
       <div class="k-calc-horizontal">
         <div class="k-input-row">
           <div>
@@ -243,14 +324,14 @@
                    class="w-full p-2 border rounded-lg text-sm">
           </div>
           <div>
-            <label class="text-xs font-bold flex items-center gap-1"><span class="highlight-badge">🔒 Private Anda</span> <span class="text-slate-500 text-[10px]">(drag/ketik)</span></label>
+            <label class="text-xs font-bold flex items-center gap-1"><span class="highlight-badge">🔒 Kunci Privat Bob</span> <span class="text-slate-500 text-[10px]">(drag/ketik)</span></label>
             <input type="number" id="bobManualPrivate" placeholder="kosong" oninput="hitungManualK('bob')"
                    ondragover="allowDropOnInput(event)" ondragleave="dragLeaveInput(event)" ondrop="dropOnInput(event,'bob','private')"
                    class="w-full p-2 border rounded-lg text-sm">
           </div>
         </div>
         <div class="k-result">
-          <div class="text-xs font-bold text-amber-700 uppercase tracking-wide">Nilai K (Shared Secret Bob)</div>
+          <div class="text-xs font-bold text-amber-700 uppercase tracking-wide">Nilai K (Bob)</div>
           <div id="bobManualKDisplay" draggable="true" ondragstart="dragManualK(event,'bob')" class="text-3xl font-black text-amber-800 cursor-grab my-1">?</div>
           <div class="flex justify-center gap-3 mt-1">
             <div id="bobMatchBadge" class="hidden text-xs font-bold text-emerald-600">🔒 Kunci Cocok!</div>
@@ -260,24 +341,32 @@
       </div>
     </div>
 
-    <div id="bobBottomSlot" class="mt-6 pt-4 border-t"></div>
+    <!-- Slot untuk menempatkan modul dekripsi -->
+    <div id="bobBottomSlot"></div>
   </div>
 </main>
 
-<!-- MODUL ENKRIPSI & DEKRIPSI (ditempatkan di slot bawah masing-masing) -->
-<div id="encryptionModule" class="role-module bg-white p-4 rounded-xl shadow-md border mt-2" style="display:none;">
-  <div class="flex items-center gap-2 border-b pb-2 mb-3"><span class="text-teal-600 text-xl">🔐</span><h3 class="font-bold text-teal-800">Enkripsi (AES-256-CBC)</h3></div>
+<!-- MODUL ENKRIPSI & DEKRIPSI (independen, akan dipindahkan ke slot) -->
+<div id="encryptionModule" class="role-module indep-card" style="display:none;">
+  <div class="card-header-title"><span class="text-teal-600 text-xl">🔐</span><h3 class="font-bold text-teal-800">Enkripsi (AES-256-CBC)</h3></div>
   <div class="space-y-3">
-    <div><label class="block text-xs font-bold"><span class="highlight-badge">Kunci K</span> (drag dari kalkulator)</label><input type="text" id="encryptK" oninput="handleKInputChange(this,'encrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-2 border rounded-lg text-sm" placeholder="Seret K disini"></div>
+    <div><label class="block text-xs font-bold"><span class="highlight-badge">Kunci K Alice</span> (drag dari kalkulator)</label><input type="text" id="encryptK" oninput="handleKInputChange(this,'encrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-2 border rounded-lg text-sm" placeholder="Seret K disini"></div>
     <div><label class="block text-xs font-bold"><span class="highlight-badge">Plaintext Asli</span></label><textarea id="encryptPlaintext" rows="2" oninput="jalankanProsesEnkripsi()" class="w-full p-2 border rounded-lg text-sm" placeholder="Tulis pesan rahasia..."></textarea></div>
-    <div><label class="block text-xs font-bold"><span class="highlight-badge">Chipertext</span> <span class="text-teal-600 text-[10px]">(drag ke dekripsi)</span></label><div id="encryptOutputCiphertext" draggable="true" ondragstart="drag(event)" class="p-2 bg-teal-600 text-white rounded-lg text-xs break-all cursor-grab font-mono">Menunggu K...</div></div>
+    <!-- Ciphertext dalam card independen -->
+    <div class="border-t pt-2 mt-1">
+      <div class="flex items-center justify-between flex-wrap gap-1 mb-1">
+        <span class="highlight-badge" id="cipherBadge">Chipertext</span>
+        <span class="text-teal-600 text-[10px] font-medium">(drag ke dekripsi)</span>
+      </div>
+      <div id="encryptOutputCiphertext" draggable="true" ondragstart="drag(event)" class="p-2 bg-teal-600 text-white rounded-lg text-xs break-all cursor-grab font-mono shadow-sm">Menunggu K...</div>
+    </div>
   </div>
 </div>
 
-<div id="decryptionModule" class="role-module bg-white p-4 rounded-xl shadow-md border mt-2" style="display:none;">
-  <div class="flex items-center gap-2 border-b pb-2 mb-3"><span class="text-amber-600 text-xl">🔓</span><h3 class="font-bold text-amber-800">Dekripsi (AES-256-CBC)</h3></div>
+<div id="decryptionModule" class="role-module indep-card" style="display:none;">
+  <div class="card-header-title"><span class="text-amber-600 text-xl">🔓</span><h3 class="font-bold text-amber-800">Dekripsi (AES-256-CBC)</h3></div>
   <div class="space-y-3">
-    <div><label class="block text-xs font-bold"><span class="highlight-badge">Kunci K</span> (drag dari kalkulator)</label><input type="text" id="decryptK" oninput="handleKInputChange(this,'decrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-2 border rounded-lg text-sm" placeholder="Seret K yang sama"></div>
+    <div><label class="block text-xs font-bold"><span class="highlight-badge">Kunci K Bob</span> (drag dari kalkulator)</label><input type="text" id="decryptK" oninput="handleKInputChange(this,'decrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-2 border rounded-lg text-sm" placeholder="Seret K yang sama"></div>
     <div id="cipherDropContainer" ondragover="allowDropCipher(event)" ondragleave="dragLeaveCipher(event)" ondrop="dropCiphertext(event)" class="border-2 border-dashed p-2 rounded-lg transition"><label class="block text-xs font-bold"><span class="highlight-badge">Chipertext</span> (drop)</label><input type="text" id="decryptCiphertext" oninput="jalankanProsesDekripsi(); evaluasiWarnaCiphertext();" class="w-full p-2 border rounded-lg text-sm font-mono" placeholder="Seret ciphertext dari enkripsi"></div>
     <div><label class="block text-xs font-bold"><span class="highlight-badge">Plaintext Hasil Dekripsi</span></label><div id="decryptOutputMessage" class="p-3 bg-slate-100 rounded-lg text-sm min-h-[60px] flex items-center">Belum ada K</div></div>
   </div>
@@ -306,7 +395,6 @@
   window.onload = function() {
     generateDHAlice();
     generateDHBob();
-    // Kosongkan kalkulator K
     document.getElementById('aliceManualPrivate').value = '';
     document.getElementById('aliceManualPublic').value = '';
     document.getElementById('bobManualPrivate').value = '';
@@ -330,14 +418,29 @@
     showMessage('✨ Selamat datang! Seret public key mitra ke kalkulator K.', false);
   };
 
-  // ---------- FUNGSI DASAR DH ----------
   function powMod(base, exp, mod) { let r=1; base%=mod; while(exp>0){ if(exp&1) r=(r*base)%mod; exp>>=1; base=(base*base)%mod; } return r; }
+  
+  // Fungsi untuk update publik dari privat (manual input)
+  function updatePublicKeyFromPrivate(side) {
+    if(side === 'alice') {
+      hitungPublikAlice();
+    } else {
+      hitungPublikBob();
+    }
+  }
+  
   function hitungPublikAlice() { let priv=parseInt(document.getElementById('alicePrivate').value)||0; document.getElementById('alicePublicDisplay').innerText = powMod(G,priv,P); }
   function hitungPublikBob() { let priv=parseInt(document.getElementById('bobPrivate').value)||0; document.getElementById('bobPublicDisplay').innerText = powMod(G,priv,P); }
-  function generateDHAlice() { document.getElementById('alicePrivate').value = Math.floor(Math.random()*25)+3; hitungPublikAlice(); }
-  function generateDHBob() { document.getElementById('bobPrivate').value = Math.floor(Math.random()*25)+3; hitungPublikBob(); }
+  
+  function generateDHAlice() { 
+    document.getElementById('alicePrivate').value = Math.floor(Math.random()*25)+3; 
+    hitungPublikAlice(); 
+  }
+  function generateDHBob() { 
+    document.getElementById('bobPrivate').value = Math.floor(Math.random()*25)+3; 
+    hitungPublikBob(); 
+  }
 
-  // ---------- DRAG & DROP ----------
   function dragPrivateKey(e) { e.dataTransfer.setData("text/plain", e.target.value); e.dataTransfer.setData("sourceType","privateKey"); e.dataTransfer.setData("sourceId", e.target.id); }
   function drag(e) { e.dataTransfer.setData("text/plain", e.target.innerText); e.dataTransfer.setData("sourceId", e.target.id); e.dataTransfer.setData("sourceType","publicKey"); }
 
@@ -464,7 +567,6 @@
     }
   }
 
-  // ========== ENKRIPSI / DEKRIPSI ==========
   function jalankanProsesEnkripsi() {
     let plain = document.getElementById('encryptPlaintext').value;
     let k = document.getElementById('encryptK').value.trim();
@@ -538,7 +640,6 @@
     }
   }
 
-  // ========== SWITCH PERAN & MODE ==========
   function switchRoles() {
     isSwapped = !isSwapped;
     let aliceSlot = document.getElementById('aliceBottomSlot'), bobSlot = document.getElementById('bobBottomSlot');
@@ -567,125 +668,52 @@
     }
   }
 
-  // ========== MODE PENYADAP (sesuai referensi) ==========
   function setModeSistem(status) {
     isRealSystemMode = status;
     const body = document.getElementById('bodyApp');
-    const mainContent = document.querySelector('main');
-    const encModule = document.getElementById('encryptionModule');
-    const decModule = document.getElementById('decryptionModule');
-    
     if (status) {
-      // ========== MODE PENYADAP ==========
       body.classList.add('dark-mode');
       body.classList.remove('bg-[#f1f5f9]');
       body.classList.add('bg-[#020617]');
-      
-      // Ubah header dan footer
       document.getElementById('headerApp').className = "bg-[#090d16] text-red-500 py-4 px-4 text-center shadow-2xl border-b border-red-950/40 transition-all duration-500";
       document.querySelector('footer').className = "bg-[#020617] border-t border-red-950/30 py-3 px-4 text-center text-xs text-slate-600";
+      const hideIds = ['cipherDropContainer', 'aliceManualPrivate', 'aliceManualPublic', 'bobManualPrivate', 'bobManualPublic', 'aliceManualKDisplay', 'bobManualKDisplay', 'encryptK', 'decryptK', 'encryptPlaintext', 'decryptOutputMessage'];
+      hideIds.forEach(id => { let el = document.getElementById(id); if(el) el.style.display = 'none'; });
+      const blurItems = document.querySelectorAll('.dh-private, .dh-button, .k-result, .alice-received-bob, .bob-received-alice, #alicePrivate, #bobPrivate, .indep-card:not(#alicePublicCard):not(#bobPublicCard):not(#encryptionModule)');
+      blurItems.forEach(el => { if(el) { el.style.filter = 'blur(4px)'; el.style.opacity = '0.25'; el.style.pointerEvents = 'none'; } });
+      const targets = [document.getElementById('alicePublicDisplay'), document.getElementById('bobPublicDisplay'), document.getElementById('encryptOutputCiphertext')];
+      targets.forEach(el => { if(el) { el.style.filter = 'none'; el.style.opacity = '1'; el.style.pointerEvents = 'auto'; el.style.boxShadow = '0 0 0 2px #ff4444, 0 0 0 4px #ffaa00'; el.style.zIndex = '100'; el.style.color = 'white'; } });
+      document.querySelectorAll('.highlight-badge').forEach(el => el.style.opacity = '0.3');
       
-      // Sembunyikan elemen yang tidak boleh terlihat (drop zone, kalkulator K, private key, nilai K)
-      const hideElements = [
-        document.getElementById('aliceDropZone'),
-        document.getElementById('bobDropZone'),
-        document.getElementById('cipherDropContainer'),
-        document.getElementById('aliceManualPrivate'),
-        document.getElementById('aliceManualPublic'),
-        document.getElementById('bobManualPrivate'),
-        document.getElementById('bobManualPublic'),
-        document.getElementById('aliceManualKDisplay'),
-        document.getElementById('bobManualKDisplay'),
-        document.getElementById('encryptK'),
-        document.getElementById('decryptK'),
-        document.getElementById('encryptPlaintext'),
-        document.getElementById('decryptOutputMessage')
-      ];
-      hideElements.forEach(el => { if (el) el.style.display = 'none'; });
-      
-      // Blur dan opacity rendah untuk elemen lain yang masih terlihat tapi tidak penting
-      const blurItems = document.querySelectorAll('.dh-private, .dh-button, .k-result, .alice-received-bob, .bob-received-alice, #alicePrivate, #bobPrivate');
-      blurItems.forEach(el => {
-        if (el) {
-          el.style.filter = 'blur(4px)';
-          el.style.opacity = '0.25';
-          el.style.pointerEvents = 'none';
-        }
-      });
-      
-      // Pastikan tiga target tetap jelas dan dapat di-drag
-      const targets = [
-        document.getElementById('alicePublicDisplay'),
-        document.getElementById('bobPublicDisplay'),
-        document.getElementById('encryptOutputCiphertext')
-      ];
-      targets.forEach(el => {
-        if (el) {
-          el.style.filter = 'none';
-          el.style.opacity = '1';
-          el.style.pointerEvents = 'auto';
-          el.style.boxShadow = '0 0 0 2px #ff4444, 0 0 0 4px #ffaa00';
-          el.style.zIndex = '100';
-          // Pastikan teks di dalamnya tetap terbaca
-          el.style.color = 'white';
-        }
-      });
-      
-      // Sembunyikan label dan badge yang tidak diperlukan
-      document.querySelectorAll('.highlight-badge, .label-muteable, .btn-hideable').forEach(el => el.style.opacity = '0.3');
+      // Pastikan badge kunci publik dan ciphertext tetap jelas (opacity 1)
+      const pubAliceBadge = document.getElementById('alicePubBadge');
+      const pubBobBadge = document.getElementById('bobPubBadge');
+      const cipherBadge = document.getElementById('cipherBadge');
+      if(pubAliceBadge) pubAliceBadge.style.opacity = '1';
+      if(pubBobBadge) pubBobBadge.style.opacity = '1';
+      if(cipherBadge) cipherBadge.style.opacity = '1';
+      // Juga pastikan teks "(drag ke kanan/kiri)" tetap terbaca
+      const aliceDragText = document.querySelector('#alicePublicCard .card-header-title .text-teal-600');
+      const bobDragText = document.querySelector('#bobPublicCard .card-header-title .text-amber-600');
+      if(aliceDragText) aliceDragText.style.opacity = '1';
+      if(bobDragText) bobDragText.style.opacity = '1';
       
     } else {
-      // ========== MODE NORMAL (SIMULASI) ==========
       body.classList.remove('dark-mode');
       body.classList.add('bg-[#f1f5f9]');
-      
-      // Kembalikan header & footer
       document.getElementById('headerApp').className = "bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-4 px-4 text-center shadow-md transition-all duration-500";
       document.querySelector('footer').className = "bg-slate-900 text-slate-400 text-center text-xs py-3 mt-6";
-      
-      // Tampilkan kembali semua elemen yang disembunyikan
-      const showElements = [
-        document.getElementById('aliceDropZone'),
-        document.getElementById('bobDropZone'),
-        document.getElementById('cipherDropContainer'),
-        document.getElementById('aliceManualPrivate'),
-        document.getElementById('aliceManualPublic'),
-        document.getElementById('bobManualPrivate'),
-        document.getElementById('bobManualPublic'),
-        document.getElementById('aliceManualKDisplay'),
-        document.getElementById('bobManualKDisplay'),
-        document.getElementById('encryptK'),
-        document.getElementById('decryptK'),
-        document.getElementById('encryptPlaintext'),
-        document.getElementById('decryptOutputMessage')
-      ];
-      showElements.forEach(el => { if (el) el.style.display = ''; });
-      
-      // Reset style blur/opacity
-      const resetItems = document.querySelectorAll('.dh-private, .dh-button, .k-result, .alice-received-bob, .bob-received-alice, #alicePrivate, #bobPrivate, .highlight-badge, .label-muteable, .btn-hideable');
-      resetItems.forEach(el => {
-        if (el) {
-          el.style.filter = '';
-          el.style.opacity = '';
-          el.style.pointerEvents = '';
-          el.style.boxShadow = '';
-        }
-      });
-      
-      // Kembalikan nilai tampilan K
-      if (aliceManualK !== null) document.getElementById('aliceManualKDisplay').innerText = aliceManualK;
-      else document.getElementById('aliceManualKDisplay').innerText = '?';
-      if (bobManualK !== null) document.getElementById('bobManualKDisplay').innerText = bobManualK;
-      else document.getElementById('bobManualKDisplay').innerText = '?';
-      
-      // Pastikan input K tidak readonly
+      const showIds = ['cipherDropContainer', 'aliceManualPrivate', 'aliceManualPublic', 'bobManualPrivate', 'bobManualPublic', 'aliceManualKDisplay', 'bobManualKDisplay', 'encryptK', 'decryptK', 'encryptPlaintext', 'decryptOutputMessage'];
+      showIds.forEach(id => { let el = document.getElementById(id); if(el) el.style.display = ''; });
+      const resetItems = document.querySelectorAll('.dh-private, .dh-button, .k-result, .alice-received-bob, .bob-received-alice, #alicePrivate, #bobPrivate, .indep-card, .highlight-badge');
+      resetItems.forEach(el => { if(el) { el.style.filter = ''; el.style.opacity = ''; el.style.pointerEvents = ''; el.style.boxShadow = ''; } });
+      if (aliceManualK !== null) document.getElementById('aliceManualKDisplay').innerText = aliceManualK; else document.getElementById('aliceManualKDisplay').innerText = '?';
+      if (bobManualK !== null) document.getElementById('bobManualKDisplay').innerText = bobManualK; else document.getElementById('bobManualKDisplay').innerText = '?';
       document.getElementById('encryptK').readOnly = false;
       document.getElementById('decryptK').readOnly = false;
       document.getElementById('aliceManualKDisplay').draggable = true;
       document.getElementById('bobManualKDisplay').draggable = true;
     }
-    
-    // Jalankan ulang evaluasi dan fungsi yang bergantung mode
     evaluasiKesesuaianKunci();
     refreshAllKInputStyles();
     evaluasiWarnaCiphertext();
