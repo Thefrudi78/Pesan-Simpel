@@ -118,6 +118,15 @@
     .toast-success { background-color: #10b981; }
     
     .big-icon { font-size: 1.5rem; }
+
+    /* Mode penyadap: elemen yang tetap jelas */
+    .eavesdrop-clear {
+      filter: none !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      box-shadow: 0 0 0 2px #ff4444, 0 0 0 4px #ffaa00 !important;
+      z-index: 100 !important;
+    }
   </style>
 </head>
 <body id="bodyApp" class="bg-[#f1f5f9] text-[#0f172a] font-sans min-h-screen flex flex-col transition-colors duration-500">
@@ -558,26 +567,130 @@
     }
   }
 
+  // ========== MODE PENYADAP (sesuai referensi) ==========
   function setModeSistem(status) {
     isRealSystemMode = status;
-    let body = document.getElementById('bodyApp');
-    if(status) {
-      body.classList.add('dark-mode'); body.classList.remove('bg-[#f1f5f9]'); body.classList.add('bg-[#020617]');
-      document.querySelectorAll('.k-input-valid, .k-input-invalid').forEach(el=>el.classList.remove('k-input-valid','k-input-invalid'));
-      document.getElementById('aliceManualKDisplay').innerText = '••'; document.getElementById('bobManualKDisplay').innerText = '••';
-      document.getElementById('encryptK').classList.add('blur-k-mode'); document.getElementById('decryptK').classList.add('blur-k-mode');
-      document.getElementById('encryptK').readOnly = true; document.getElementById('decryptK').readOnly = true;
-      document.getElementById('aliceManualKDisplay').draggable = false; document.getElementById('bobManualKDisplay').draggable = false;
+    const body = document.getElementById('bodyApp');
+    const mainContent = document.querySelector('main');
+    const encModule = document.getElementById('encryptionModule');
+    const decModule = document.getElementById('decryptionModule');
+    
+    if (status) {
+      // ========== MODE PENYADAP ==========
+      body.classList.add('dark-mode');
+      body.classList.remove('bg-[#f1f5f9]');
+      body.classList.add('bg-[#020617]');
+      
+      // Ubah header dan footer
+      document.getElementById('headerApp').className = "bg-[#090d16] text-red-500 py-4 px-4 text-center shadow-2xl border-b border-red-950/40 transition-all duration-500";
+      document.querySelector('footer').className = "bg-[#020617] border-t border-red-950/30 py-3 px-4 text-center text-xs text-slate-600";
+      
+      // Sembunyikan elemen yang tidak boleh terlihat (drop zone, kalkulator K, private key, nilai K)
+      const hideElements = [
+        document.getElementById('aliceDropZone'),
+        document.getElementById('bobDropZone'),
+        document.getElementById('cipherDropContainer'),
+        document.getElementById('aliceManualPrivate'),
+        document.getElementById('aliceManualPublic'),
+        document.getElementById('bobManualPrivate'),
+        document.getElementById('bobManualPublic'),
+        document.getElementById('aliceManualKDisplay'),
+        document.getElementById('bobManualKDisplay'),
+        document.getElementById('encryptK'),
+        document.getElementById('decryptK'),
+        document.getElementById('encryptPlaintext'),
+        document.getElementById('decryptOutputMessage')
+      ];
+      hideElements.forEach(el => { if (el) el.style.display = 'none'; });
+      
+      // Blur dan opacity rendah untuk elemen lain yang masih terlihat tapi tidak penting
+      const blurItems = document.querySelectorAll('.dh-private, .dh-button, .k-result, .alice-received-bob, .bob-received-alice, #alicePrivate, #bobPrivate');
+      blurItems.forEach(el => {
+        if (el) {
+          el.style.filter = 'blur(4px)';
+          el.style.opacity = '0.25';
+          el.style.pointerEvents = 'none';
+        }
+      });
+      
+      // Pastikan tiga target tetap jelas dan dapat di-drag
+      const targets = [
+        document.getElementById('alicePublicDisplay'),
+        document.getElementById('bobPublicDisplay'),
+        document.getElementById('encryptOutputCiphertext')
+      ];
+      targets.forEach(el => {
+        if (el) {
+          el.style.filter = 'none';
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
+          el.style.boxShadow = '0 0 0 2px #ff4444, 0 0 0 4px #ffaa00';
+          el.style.zIndex = '100';
+          // Pastikan teks di dalamnya tetap terbaca
+          el.style.color = 'white';
+        }
+      });
+      
+      // Sembunyikan label dan badge yang tidak diperlukan
+      document.querySelectorAll('.highlight-badge, .label-muteable, .btn-hideable').forEach(el => el.style.opacity = '0.3');
+      
     } else {
-      body.classList.remove('dark-mode'); body.classList.add('bg-[#f1f5f9]');
-      if(aliceManualK!==null) document.getElementById('aliceManualKDisplay').innerText = aliceManualK; else document.getElementById('aliceManualKDisplay').innerText = '?';
-      if(bobManualK!==null) document.getElementById('bobManualKDisplay').innerText = bobManualK; else document.getElementById('bobManualKDisplay').innerText = '?';
-      document.getElementById('encryptK').classList.remove('blur-k-mode'); document.getElementById('decryptK').classList.remove('blur-k-mode');
-      document.getElementById('encryptK').readOnly = false; document.getElementById('decryptK').readOnly = false;
-      document.getElementById('aliceManualKDisplay').draggable = true; document.getElementById('bobManualKDisplay').draggable = true;
+      // ========== MODE NORMAL (SIMULASI) ==========
+      body.classList.remove('dark-mode');
+      body.classList.add('bg-[#f1f5f9]');
+      
+      // Kembalikan header & footer
+      document.getElementById('headerApp').className = "bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-4 px-4 text-center shadow-md transition-all duration-500";
+      document.querySelector('footer').className = "bg-slate-900 text-slate-400 text-center text-xs py-3 mt-6";
+      
+      // Tampilkan kembali semua elemen yang disembunyikan
+      const showElements = [
+        document.getElementById('aliceDropZone'),
+        document.getElementById('bobDropZone'),
+        document.getElementById('cipherDropContainer'),
+        document.getElementById('aliceManualPrivate'),
+        document.getElementById('aliceManualPublic'),
+        document.getElementById('bobManualPrivate'),
+        document.getElementById('bobManualPublic'),
+        document.getElementById('aliceManualKDisplay'),
+        document.getElementById('bobManualKDisplay'),
+        document.getElementById('encryptK'),
+        document.getElementById('decryptK'),
+        document.getElementById('encryptPlaintext'),
+        document.getElementById('decryptOutputMessage')
+      ];
+      showElements.forEach(el => { if (el) el.style.display = ''; });
+      
+      // Reset style blur/opacity
+      const resetItems = document.querySelectorAll('.dh-private, .dh-button, .k-result, .alice-received-bob, .bob-received-alice, #alicePrivate, #bobPrivate, .highlight-badge, .label-muteable, .btn-hideable');
+      resetItems.forEach(el => {
+        if (el) {
+          el.style.filter = '';
+          el.style.opacity = '';
+          el.style.pointerEvents = '';
+          el.style.boxShadow = '';
+        }
+      });
+      
+      // Kembalikan nilai tampilan K
+      if (aliceManualK !== null) document.getElementById('aliceManualKDisplay').innerText = aliceManualK;
+      else document.getElementById('aliceManualKDisplay').innerText = '?';
+      if (bobManualK !== null) document.getElementById('bobManualKDisplay').innerText = bobManualK;
+      else document.getElementById('bobManualKDisplay').innerText = '?';
+      
+      // Pastikan input K tidak readonly
+      document.getElementById('encryptK').readOnly = false;
+      document.getElementById('decryptK').readOnly = false;
+      document.getElementById('aliceManualKDisplay').draggable = true;
+      document.getElementById('bobManualKDisplay').draggable = true;
     }
-    evaluasiKesesuaianKunci(); refreshAllKInputStyles(); evaluasiWarnaCiphertext();
-    jalankanProsesEnkripsi(); jalankanProsesDekripsi();
+    
+    // Jalankan ulang evaluasi dan fungsi yang bergantung mode
+    evaluasiKesesuaianKunci();
+    refreshAllKInputStyles();
+    evaluasiWarnaCiphertext();
+    jalankanProsesEnkripsi();
+    jalankanProsesDekripsi();
   }
 </script>
 </body>
