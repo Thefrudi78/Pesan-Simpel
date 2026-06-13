@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diffie-Hellman & AES - Kotak Public Key Bertukar Penuh</title>
+  <title>Diffie-Hellman & AES - Mulai dari Awal (Kosong)</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
@@ -24,8 +24,7 @@
     .drag-input-over { background-color: #e2e8f0; border-color: #14b8a6; transform: scale(1.01); transition: all 0.1s; }
     .dark-mode .drag-input-over { background-color: #1e293b; border-color: #2dd4bf; }
     
-    /* Warna PENUH untuk dropzone public key setelah bertukar - GRADIEN SAMA DENGAN SUMBER */
-    /* Alice menerima public key dari Bob -> background gradien ala Bob (amber-orange) */
+    /* Warna PENUH untuk dropzone public key setelah bertukar */
     .alice-received-bob {
       background: linear-gradient(135deg, #f59e0b, #ea580c) !important;
       color: white !important;
@@ -33,7 +32,6 @@
       font-weight: bold;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    /* Bob menerima public key dari Alice -> background gradien ala Alice (teal-emerald) */
     .bob-received-alice {
       background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
       color: white !important;
@@ -41,7 +39,6 @@
       font-weight: bold;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    /* Versi dark mode: tetap pakai gradien terang agar terlihat */
     .dark-mode .alice-received-bob {
       background: linear-gradient(135deg, #f59e0b, #ea580c) !important;
       color: white !important;
@@ -51,7 +48,7 @@
       color: white !important;
     }
     
-    /* Efek flash sementara (warna asal pengirim) - hanya untuk animasi */
+    /* Efek flash sementara */
     .public-drop-flash-alice {
       background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
       color: white !important;
@@ -75,17 +72,36 @@
     .alice-drop-public { text-align: right; }
     .bob-drop-public { text-align: left; }
     
-    /* Style dasar input */
     input, .public-drop-target-alice, .public-drop-target-bob {
       transition: all 0.2s ease;
     }
+
+    /* Toast notification */
+    .toast-notify {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1e293b;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast-error { background-color: #dc2626; }
+    .toast-success { background-color: #10b981; }
   </style>
 </head>
 <body id="bodyApp" class="bg-[#f1f5f9] text-[#0f172a] font-sans min-h-screen flex flex-col transition-colors duration-500">
 
 <header id="headerApp" class="bg-gradient-to-r from-[#14b8a6] via-[#0ea5a4] to-[#0d9488] text-white py-3 px-4 text-center shadow-md transition-all duration-500">
-  <h1 class="text-xl md:text-2xl font-extrabold">🎨 Kotak Public Key Bertukar Penuh</h1>
-  <p class="text-teal-100 text-xs max-w-2xl mx-auto">Drag & drop public key mitra → kotak tujuan berubah warna GRADIEN sama persis dengan kotak sumber (seperti berpindah)</p>
+  <h1 class="text-xl md:text-2xl font-extrabold">🔐 DH & AES – Mulai dari Awal (Kosong)</h1>
+  <p class="text-teal-100 text-xs max-w-2xl mx-auto">✨ 4 kolom awal sudah terisi random. Seret public key mitra ke kolom kalkulator K untuk menghitung shared secret.</p>
   <div class="mt-2 flex flex-wrap justify-center items-center gap-2 bg-teal-950/40 p-1.5 rounded-xl max-w-3xl mx-auto">
     <button id="btnSwitchRoles" onclick="switchRoles()" class="px-3 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-teal-400 to-emerald-400 text-teal-950 shadow flex items-center gap-1">🔄 Tukar Peran</button>
     <button id="btnModeSimulasi" onclick="setModeSistem(false)" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-teal-700 shadow">🔍 Mode Simulasi</button>
@@ -105,17 +121,17 @@
       </div>
     </div>
 
-    <!-- Baris kunci DH Alice -->
+    <!-- Baris kunci DH Alice (privat + publik) -->
     <div class="bg-slate-50 p-3 rounded-xl border mb-4">
       <div class="text-xs font-bold text-teal-700 mb-2">🔑 Kunci Diffie-Hellman Alice</div>
       <div class="dh-key-row">
         <div class="dh-private">
           <label class="block text-[10px] font-semibold text-slate-600">Privat <span class="text-teal-600">(drag)</span></label>
-          <input type="number" id="alicePrivate" value="21" draggable="true" ondragstart="dragPrivateKey(event)" class="w-full p-1.5 bg-white border rounded text-sm font-mono cursor-grab text-center">
+          <input type="number" id="alicePrivate" draggable="true" ondragstart="dragPrivateKey(event)" class="w-full p-1.5 bg-white border rounded text-sm font-mono cursor-grab text-center">
         </div>
         <div class="dh-public">
           <label class="block text-[10px] font-semibold text-slate-600">Publik (drag ke kanan)</label>
-          <div id="alicePublicDisplay" draggable="true" ondragstart="drag(event)" class="p-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded text-center text-sm font-bold cursor-grab shadow">77</div>
+          <div id="alicePublicDisplay" draggable="true" ondragstart="drag(event)" class="p-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded text-center text-sm font-bold cursor-grab shadow">-</div>
         </div>
         <div class="dh-button">
           <button onclick="generateDHAlice()" class="text-[10px] bg-white border px-2 py-1 rounded hover:bg-slate-100 mt-5">🔄 Acak</button>
@@ -123,19 +139,19 @@
       </div>
     </div>
 
-    <!-- Kalkulator K Manual Alice -->
+    <!-- Kalkulator K Manual Alice (kosong awal) -->
     <div class="mt-3 border-t border-teal-200 pt-3">
       <div class="text-xs font-bold text-teal-700 mb-2">🧮 Kalkulator K (Alice)</div>
       <div class="drop-public-row">
         <div class="drop-private-area">
           <label class="block text-[9px] font-semibold">Private Anda</label>
-          <input type="number" id="aliceManualPrivate" placeholder="21" oninput="hitungManualK('alice'); resetDropzoneColor('alice')"
+          <input type="number" id="aliceManualPrivate" placeholder="(kosong)" oninput="hitungManualK('alice'); resetDropzoneColor('alice')"
                  ondragover="allowDropOnInput(event)" ondragleave="dragLeaveInput(event)" ondrop="dropOnInput(event,'alice','private')"
                  class="w-full p-1.5 border rounded text-sm">
         </div>
         <div class="drop-public-area alice-drop-public">
-          <label class="block text-[9px] font-semibold">Public Mitra (Bob) <span class="text-teal-600">⬅️ drag dari kanan</span></label>
-          <input type="number" id="aliceManualPublic" placeholder="83" oninput="hitungManualK('alice')"
+          <label class="block text-[9px] font-semibold">Public Mitra (Bob) <span class="text-teal-600">⬅️ drag dari kotak Bob</span></label>
+          <input type="number" id="aliceManualPublic" placeholder="(kosong)" oninput="hitungManualK('alice')"
                  ondragover="allowDropOnInput(event)" ondragleave="dragLeaveInput(event)" ondrop="dropOnInputWithColor(event,'alice','public')"
                  class="w-full p-1.5 border rounded text-sm public-drop-target-alice">
         </div>
@@ -169,11 +185,11 @@
       <div class="dh-key-row dh-key-row-reverse">
         <div class="dh-private" style="text-align: right;">
           <label class="block text-[10px] font-semibold text-slate-600">Privat <span class="text-amber-600">(drag)</span></label>
-          <input type="number" id="bobPrivate" value="17" draggable="true" ondragstart="dragPrivateKey(event)" class="w-full p-1.5 bg-white border rounded text-sm font-mono cursor-grab text-center">
+          <input type="number" id="bobPrivate" draggable="true" ondragstart="dragPrivateKey(event)" class="w-full p-1.5 bg-white border rounded text-sm font-mono cursor-grab text-center">
         </div>
         <div class="dh-public">
           <label class="block text-[10px] font-semibold text-slate-600">Publik (drag ke kiri)</label>
-          <div id="bobPublicDisplay" draggable="true" ondragstart="drag(event)" class="p-1.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded text-center text-sm font-bold cursor-grab shadow">83</div>
+          <div id="bobPublicDisplay" draggable="true" ondragstart="drag(event)" class="p-1.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded text-center text-sm font-bold cursor-grab shadow">-</div>
         </div>
         <div class="dh-button">
           <button onclick="generateDHBob()" class="text-[10px] bg-white border px-2 py-1 rounded hover:bg-slate-100 mt-5">🔄 Acak</button>
@@ -181,19 +197,19 @@
       </div>
     </div>
 
-    <!-- Kalkulator K Manual Bob -->
+    <!-- Kalkulator K Manual Bob (kosong) -->
     <div class="mt-3 border-t border-amber-200 pt-3">
       <div class="text-xs font-bold text-amber-700 mb-2">🧮 Kalkulator K (Bob)</div>
       <div class="drop-public-row bob-drop-public">
         <div class="drop-public-area">
-          <label class="block text-[9px] font-semibold">Public Mitra (Alice) <span class="text-amber-600">⬅️ drag dari kiri</span></label>
-          <input type="number" id="bobManualPublic" placeholder="77" oninput="hitungManualK('bob')"
+          <label class="block text-[9px] font-semibold">Public Mitra (Alice) <span class="text-amber-600">⬅️ drag dari kotak Alice</span></label>
+          <input type="number" id="bobManualPublic" placeholder="(kosong)" oninput="hitungManualK('bob')"
                  ondragover="allowDropOnInput(event)" ondragleave="dragLeaveInput(event)" ondrop="dropOnInputWithColor(event,'bob','public')"
                  class="w-full p-1.5 border rounded text-sm public-drop-target-bob">
         </div>
         <div class="drop-private-area" style="text-align: right;">
           <label class="block text-[9px] font-semibold">Private Anda</label>
-          <input type="number" id="bobManualPrivate" placeholder="17" oninput="hitungManualK('bob'); resetDropzoneColor('bob')"
+          <input type="number" id="bobManualPrivate" placeholder="(kosong)" oninput="hitungManualK('bob'); resetDropzoneColor('bob')"
                  ondragover="allowDropOnInput(event)" ondragleave="dragLeaveInput(event)" ondrop="dropOnInput(event,'bob','private')"
                  class="w-full p-1.5 border rounded text-sm">
         </div>
@@ -212,12 +228,12 @@
   </div>
 </main>
 
-<!-- MODUL ENKRIPSI & DEKRIPSI (tetap) -->
+<!-- MODUL ENKRIPSI & DEKRIPSI (kosong K) -->
 <div id="encryptionModule" class="role-module bg-white p-3 rounded-xl shadow-sm border mt-2" style="display:none;">
   <div class="text-sm font-bold text-teal-700 mb-2">🔐 Enkripsi (AES-256-CBC)</div>
   <div class="grid grid-cols-1 gap-2">
-    <div><label class="text-[10px] font-bold">Kunci K (drag dari kalkulator)</label><input type="text" id="encryptK" oninput="handleKInputChange(this,'encrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-1.5 border rounded text-xs" placeholder="Seret K kesini"></div>
-    <div><label class="text-[10px] font-bold">Plaintext</label><textarea id="encryptPlaintext" rows="2" oninput="jalankanProsesEnkripsi()" class="w-full p-1.5 border rounded text-xs" placeholder="Pesan rahasia..."></textarea></div>
+    <div><label class="text-[10px] font-bold">Kunci K (drag dari kalkulator)</label><input type="text" id="encryptK" oninput="handleKInputChange(this,'encrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-1.5 border rounded text-xs" placeholder="Seret K yang sudah dihitung"></div>
+    <div><label class="text-[10px] font-bold">Plaintext</label><textarea id="encryptPlaintext" rows="2" oninput="jalankanProsesEnkripsi()" class="w-full p-1.5 border rounded text-xs" placeholder="Tulis pesan rahasia..."></textarea></div>
     <div><label class="text-[10px] font-bold">Ciphertext <span class="text-teal-600">(drag ke dekripsi)</span></label><div id="encryptOutputCiphertext" draggable="true" ondragstart="drag(event)" class="p-1.5 bg-teal-600 text-white rounded text-xs break-all cursor-grab">Menunggu K...</div></div>
   </div>
 </div>
@@ -225,13 +241,13 @@
 <div id="decryptionModule" class="role-module bg-white p-3 rounded-xl shadow-sm border mt-2" style="display:none;">
   <div class="text-sm font-bold text-amber-700 mb-2">🔓 Dekripsi (AES-256-CBC)</div>
   <div class="grid grid-cols-1 gap-2">
-    <div><label class="text-[10px] font-bold">Kunci K (drag dari kalkulator)</label><input type="text" id="decryptK" oninput="handleKInputChange(this,'decrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-1.5 border rounded text-xs" placeholder="Seret K kesini"></div>
-    <div id="cipherDropContainer" ondragover="allowDropCipher(event)" ondragleave="dragLeaveCipher(event)" ondrop="dropCiphertext(event)" class="border-2 border-dashed p-2 rounded-lg transition"><label class="text-[10px] font-bold">Ciphertext (drop)</label><input type="text" id="decryptCiphertext" oninput="jalankanProsesDekripsi(); evaluasiWarnaCiphertext();" class="w-full p-1.5 border rounded text-xs"></div>
+    <div><label class="text-[10px] font-bold">Kunci K (drag dari kalkulator)</label><input type="text" id="decryptK" oninput="handleKInputChange(this,'decrypt')" ondrop="dropK(event)" ondragover="event.preventDefault()" class="w-full p-1.5 border rounded text-xs" placeholder="Seret K yang sama"></div>
+    <div id="cipherDropContainer" ondragover="allowDropCipher(event)" ondragleave="dragLeaveCipher(event)" ondrop="dropCiphertext(event)" class="border-2 border-dashed p-2 rounded-lg transition"><label class="text-[10px] font-bold">Ciphertext (drop)</label><input type="text" id="decryptCiphertext" oninput="jalankanProsesDekripsi(); evaluasiWarnaCiphertext();" class="w-full p-1.5 border rounded text-xs" placeholder="Seret ciphertext dari enkripsi"></div>
     <div><label class="text-[10px] font-bold">Plaintext hasil dekripsi</label><div id="decryptOutputMessage" class="p-2 bg-slate-100 text-xs rounded min-h-[50px] flex items-center">Belum ada K</div></div>
   </div>
 </div>
 
-<footer class="bg-slate-900 text-slate-400 text-center text-[10px] py-2 mt-4">✨ Kotak public key mitra berubah gradien PERSIS seperti kotak sumber — seolah-olah kotaknya berpindah.</footer>
+<footer class="bg-slate-900 text-slate-400 text-center text-[10px] py-2 mt-4">💡 Mulai: Seret public key mitra ke kolom kalkulator K → hitung K → seret K ke enkripsi/dekripsi.</footer>
 
 <script>
   const G = 5, P = 97;
@@ -239,37 +255,78 @@
   let isSwapped = false;
   let aliceManualK = null, bobManualK = null;
 
+  let toastTimeout = null;
+  function showMessage(msg, isError = true) {
+    let existingToast = document.querySelector('.toast-notify');
+    if(existingToast) existingToast.remove();
+    let toast = document.createElement('div');
+    toast.className = `toast-notify ${isError ? 'toast-error' : 'toast-success'}`;
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    if(toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => { if(toast) toast.remove(); }, 2500);
+  }
+
   window.onload = function() {
-    document.getElementById('alicePrivate').value = 21;
-    document.getElementById('bobPrivate').value = 17;
-    hitungPublikAlice(); hitungPublikBob();
-    document.getElementById('aliceManualPrivate').value = 21;
-    document.getElementById('aliceManualPublic').value = 83;
-    document.getElementById('bobManualPrivate').value = 17;
-    document.getElementById('bobManualPublic').value = 77;
-    hitungManualK('alice'); hitungManualK('bob');
+    // Generate random private keys untuk kedua sisi
+    generateDHAlice();
+    generateDHBob();
+    // Kosongkan semua kalkulator K
+    document.getElementById('aliceManualPrivate').value = '';
+    document.getElementById('aliceManualPublic').value = '';
+    document.getElementById('bobManualPrivate').value = '';
+    document.getElementById('bobManualPublic').value = '';
+    // Reset tampilan K
+    aliceManualK = null; bobManualK = null;
+    document.getElementById('aliceManualKDisplay').innerText = '?';
+    document.getElementById('bobManualKDisplay').innerText = '?';
+    // Kosongkan modul enkripsi/dekripsi
+    document.getElementById('encryptK').value = '';
+    document.getElementById('decryptK').value = '';
+    document.getElementById('encryptPlaintext').value = '';
+    document.getElementById('encryptOutputCiphertext').innerText = 'Menunggu K...';
+    document.getElementById('decryptCiphertext').value = '';
+    document.getElementById('decryptOutputMessage').innerText = 'Belum ada K';
+    // Reset badge cocok/tidak
+    document.getElementById('aliceMatchBadge').classList.add('hidden');
+    document.getElementById('aliceMismatchBadge').classList.add('hidden');
+    document.getElementById('bobMatchBadge').classList.add('hidden');
+    document.getElementById('bobMismatchBadge').classList.add('hidden');
+    
     setModeSistem(false);
     placeModulesToDefaultSlots();
+    showMessage('✨ Selamat datang! Seret public key mitra ke kalkulator K.', false);
   };
 
   function powMod(base, exp, mod) { let r=1; base%=mod; while(exp>0){ if(exp&1) r=(r*base)%mod; exp>>=1; base=(base*base)%mod; } return r; }
-  function hitungPublikAlice() { let priv=parseInt(document.getElementById('alicePrivate').value)||0; document.getElementById('alicePublicDisplay').innerText = powMod(G,priv,P); }
-  function hitungPublikBob() { let priv=parseInt(document.getElementById('bobPrivate').value)||0; document.getElementById('bobPublicDisplay').innerText = powMod(G,priv,P); }
-  function generateDHAlice() { document.getElementById('alicePrivate').value = Math.floor(Math.random()*25)+3; hitungPublikAlice(); }
-  function generateDHBob() { document.getElementById('bobPrivate').value = Math.floor(Math.random()*25)+3; hitungPublikBob(); }
+  
+  function hitungPublikAlice() { 
+    let priv = parseInt(document.getElementById('alicePrivate').value) || 0; 
+    document.getElementById('alicePublicDisplay').innerText = powMod(G, priv, P); 
+  }
+  function hitungPublikBob() { 
+    let priv = parseInt(document.getElementById('bobPrivate').value) || 0; 
+    document.getElementById('bobPublicDisplay').innerText = powMod(G, priv, P); 
+  }
+  function generateDHAlice() { 
+    document.getElementById('alicePrivate').value = Math.floor(Math.random() * 25) + 3; 
+    hitungPublikAlice(); 
+  }
+  function generateDHBob() { 
+    document.getElementById('bobPrivate').value = Math.floor(Math.random() * 25) + 3; 
+    hitungPublikBob(); 
+  }
 
-  function dragPrivateKey(e) { e.dataTransfer.setData("text/plain", e.target.value); e.dataTransfer.setData("sourceType","privateKey"); }
+  function dragPrivateKey(e) { e.dataTransfer.setData("text/plain", e.target.value); e.dataTransfer.setData("sourceType","privateKey"); e.dataTransfer.setData("sourceId", e.target.id); }
   function drag(e) { e.dataTransfer.setData("text/plain", e.target.innerText); e.dataTransfer.setData("sourceId", e.target.id); e.dataTransfer.setData("sourceType","publicKey"); }
 
   function allowDropOnInput(e) { e.preventDefault(); e.currentTarget.classList.add('drag-input-over'); }
   function dragLeaveInput(e) { e.currentTarget.classList.remove('drag-input-over'); }
 
-  // Reset warna ke default (tanpa background gradien khusus)
   function resetDropzoneColor(side) {
     if(side === 'alice') {
       let inputPub = document.getElementById('aliceManualPublic');
       inputPub.classList.remove('alice-received-bob', 'public-drop-flash-alice');
-      // kembalikan ke style default input
       inputPub.style.background = '';
       inputPub.style.color = '';
       inputPub.style.border = '';
@@ -282,25 +339,33 @@
     }
   }
 
-  // Drop public key mitra dengan perubahan warna PENUH (gradien persis seperti sumber)
   function dropOnInputWithColor(e, side, type) {
     e.preventDefault(); e.currentTarget.classList.remove('drag-input-over');
-    let data = e.dataTransfer.getData("text/plain");
     let sourceId = e.dataTransfer.getData("sourceId");
+    let data = e.dataTransfer.getData("text/plain");
     let num = parseInt(data);
     if(isNaN(num)) return;
-    
+
     if(side === 'alice') {
+      if(sourceId !== 'bobPublicDisplay') {
+        showMessage('❌ Salah! Seret public key dari kotak BOB (warna oranye) ke sini.', true);
+        return;
+      }
       let inputEl = document.getElementById('aliceManualPublic');
       inputEl.value = num;
-      // Efek flash sebentar (warna asal Alice = teal) lalu permanen menjadi gradien Bob (orange)
       inputEl.classList.add('public-drop-flash-alice');
       setTimeout(() => {
         inputEl.classList.remove('public-drop-flash-alice');
         inputEl.classList.add('alice-received-bob');
       }, 200);
       hitungManualK('alice');
-    } else {
+      showMessage('✅ Public key Bob berhasil diterima Alice!', false);
+    } 
+    else if(side === 'bob') {
+      if(sourceId !== 'alicePublicDisplay') {
+        showMessage('❌ Salah! Seret public key dari kotak ALICE (warna hijau) ke sini.', true);
+        return;
+      }
       let inputEl = document.getElementById('bobManualPublic');
       inputEl.value = num;
       inputEl.classList.add('public-drop-flash-bob');
@@ -309,6 +374,7 @@
         inputEl.classList.add('bob-received-alice');
       }, 200);
       hitungManualK('bob');
+      showMessage('✅ Public key Alice berhasil diterima Bob!', false);
     }
   }
 
@@ -342,13 +408,23 @@
     if(side==='alice') {
       let priv = parseInt(document.getElementById('aliceManualPrivate').value);
       let pub = parseInt(document.getElementById('aliceManualPublic').value);
-      if(!isNaN(priv) && !isNaN(pub)) { aliceManualK = powMod(pub, priv, P); document.getElementById('aliceManualKDisplay').innerText = isRealSystemMode ? "••" : aliceManualK; }
-      else { aliceManualK = null; document.getElementById('aliceManualKDisplay').innerText = "?"; }
+      if(!isNaN(priv) && !isNaN(pub)) { 
+        aliceManualK = powMod(pub, priv, P); 
+        document.getElementById('aliceManualKDisplay').innerText = isRealSystemMode ? "••" : aliceManualK; 
+      } else { 
+        aliceManualK = null; 
+        document.getElementById('aliceManualKDisplay').innerText = "?"; 
+      }
     } else {
       let priv = parseInt(document.getElementById('bobManualPrivate').value);
       let pub = parseInt(document.getElementById('bobManualPublic').value);
-      if(!isNaN(priv) && !isNaN(pub)) { bobManualK = powMod(pub, priv, P); document.getElementById('bobManualKDisplay').innerText = isRealSystemMode ? "••" : bobManualK; }
-      else { bobManualK = null; document.getElementById('bobManualKDisplay').innerText = "?"; }
+      if(!isNaN(priv) && !isNaN(pub)) { 
+        bobManualK = powMod(pub, priv, P); 
+        document.getElementById('bobManualKDisplay').innerText = isRealSystemMode ? "••" : bobManualK; 
+      } else { 
+        bobManualK = null; 
+        document.getElementById('bobManualKDisplay').innerText = "?"; 
+      }
     }
     evaluasiKesesuaianKunci();
     refreshAllKInputStyles();
@@ -358,6 +434,7 @@
     let k = (side==='alice') ? aliceManualK : bobManualK;
     if(k===null) { e.preventDefault(); return false; }
     e.dataTransfer.setData("text/plain", k.toString());
+    e.dataTransfer.setData("sourceType","manualK");
   }
 
   function dropK(e) {
