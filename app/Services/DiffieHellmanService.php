@@ -4,7 +4,6 @@
 namespace App\Services;
 
 use phpseclib3\Math\BigInteger;
-use phpseclib3\Crypt\DH;
 use phpseclib3\Crypt\AES;
 
 class DiffieHellmanService
@@ -23,62 +22,45 @@ class DiffieHellmanService
         '15728E5A8AACAA68FFFFFFFFFFFFFFFF';
     private int $generator = 2;
 
-    /**
-     * Generate pasangan kunci DH untuk user
-     */
     public function generateKeyPair(): array
     {
         $p = new BigInteger($this->prime, 16);
         $g = new BigInteger($this->generator);
-
-        // Generate private key (random)
         $privateKey = new BigInteger(random_bytes(32), 256);
-
-        // Hitung public key: g^privateKey mod p
         $publicKey = $g->modPow($privateKey, $p);
-
         return [
             'private_key' => $privateKey->toHex(),
             'public_key'  => $publicKey->toHex(),
         ];
     }
 
-    /**
-     * Hitung shared secret dari private key kita + public key lawan
-     */
     public function computeSharedSecret(string $ourPrivateKeyHex, string $theirPublicKeyHex): string
     {
         $p = new BigInteger($this->prime, 16);
-
         $privateKey   = new BigInteger($ourPrivateKeyHex, 16);
         $theirPublicKey = new BigInteger($theirPublicKeyHex, 16);
-
-        // Shared secret: theirPublicKey^ourPrivateKey mod p
         $sharedSecret = $theirPublicKey->modPow($privateKey, $p);
-        $printedSharedSecret = $sharedSecret->toHex(); // Convert to hex for demonstration
-
-        // --- DEMONSTRATION PURPOSE ONLY ---
-        // Print the raw shared secret to the console in hexadecimal format.
-        // Ensure you remove this in a production environment to prevent leaking secrets in your logs!
-        error_log("Demonstration - Shared Secret (hex): " . $printedSharedSecret);
-        // ----------------------------------
-
-        // Derive AES key dengan SHA-256 (32 bytes = AES-256)
+        error_log("DH Shared Secret (hex): " . $sharedSecret->toHex());
         return hash('sha256', $sharedSecret->toBytes(), true);
     }
 
     /**
-     * Enkripsi pesan dengan AES-256-CBC
+     * Enkripsi (selalu catat waktu)
      */
     public function encrypt(string $message, string $aesKey): array
     {
-        $iv = random_bytes(16); // 128-bit IV
+        \Log::info(">>> ENCRYPT DIPANGGIL");
+        $start = microtime(true);
 
+        $iv = random_bytes(16);
         $aes = new AES('cbc');
         $aes->setKey($aesKey);
         $aes->setIV($iv);
-
         $encrypted = $aes->encrypt($message);
+
+        $end = microtime(true);
+        $timeMs = ($end - $start) * 1000;
+        \Log::info("ENC | " . $timeMs . " ms");
 
         return [
             'content' => base64_encode($encrypted),
@@ -87,14 +69,21 @@ class DiffieHellmanService
     }
 
     /**
-     * Dekripsi pesan dengan AES-256-CBC
+     * Dekripsi (selalu catat waktu)
      */
     public function decrypt(string $encryptedContent, string $aesKey, string $iv): string
     {
+        $start = microtime(true);
+
         $aes = new AES('cbc');
         $aes->setKey($aesKey);
         $aes->setIV(base64_decode($iv));
+        $decrypted = $aes->decrypt(base64_decode($encryptedContent));
 
-        return $aes->decrypt(base64_decode($encryptedContent));
+        $end = microtime(true);
+        $timeMs = ($end - $start) * 1000;
+        \Log::info("DEC | " . $timeMs . " ms");
+
+        return $decrypted;
     }
 }
