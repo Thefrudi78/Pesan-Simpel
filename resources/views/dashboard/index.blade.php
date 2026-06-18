@@ -11,17 +11,12 @@
     <style>
         /* =========================================================
            OnlyChat — Premium Encrypted Messaging UI
-           Theme: Dark sidebar + Light chat area (Telegram-inspired)
-           Accent: Teal/Emerald (encryption vibe)
            ========================================================= */
-
-        /* ---------- 1. CSS Variables & Design Tokens ---------- */
         :root {
             --brand-primary: #0ea5a4;
             --brand-primary-dark: #0d9488;
             --brand-gradient: linear-gradient(135deg, #14b8a6 0%, #0ea5a4 50%, #0d9488 100%);
             --brand-glow: rgba(20, 184, 166, 0.35);
-
             --sidebar-bg: #0f1720;
             --sidebar-bg-elevated: #151f2a;
             --sidebar-border: rgba(255, 255, 255, 0.06);
@@ -30,7 +25,6 @@
             --sidebar-hover: rgba(255, 255, 255, 0.04);
             --sidebar-active: rgba(20, 184, 166, 0.12);
             --sidebar-active-border: #14b8a6;
-
             --chat-bg: #f1f5f9;
             --chat-bg-pattern: #e2e8f0;
             --chat-surface: #ffffff;
@@ -38,55 +32,37 @@
             --chat-text: #0f172a;
             --chat-text-muted: #64748b;
             --chat-header-bg: rgba(255, 255, 255, 0.85);
-
             --bubble-sent-bg: linear-gradient(135deg, #14b8a6 0%, #0ea5a4 100%);
             --bubble-sent-text: #ffffff;
             --bubble-received-bg: #ffffff;
             --bubble-received-text: #0f172a;
             --bubble-received-border: #e2e8f0;
-
             --success: #10b981;
             --success-bg: rgba(16, 185, 129, 0.1);
             --danger: #ef4444;
             --danger-bg: #fef2f2;
-            --warning: #f59e0b;
-
             --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
             --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
             --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
             --shadow-xl: 0 20px 50px rgba(15, 23, 42, 0.18);
             --shadow-glow: 0 8px 24px rgba(20, 184, 166, 0.3);
-
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 20px;
             --radius-full: 999px;
-
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
             --transition-fast: 150ms var(--ease);
             --transition-base: 250ms var(--ease);
             --transition-slow: 400ms var(--ease);
-
             --sidebar-width: 320px;
             --header-height: 72px;
             --input-height: 76px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; width: 100%; overflow: hidden; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             font-size: 15px;
@@ -98,24 +74,10 @@
             text-rendering: optimizeLegibility;
             display: flex;
         }
+        button { font-family: inherit; border: none; cursor: pointer; background: none; color: inherit; }
+        input { font-family: inherit; border: none; outline: none; background: none; color: inherit; }
 
-        button {
-            font-family: inherit;
-            border: none;
-            cursor: pointer;
-            background: none;
-            color: inherit;
-        }
-
-        input {
-            font-family: inherit;
-            border: none;
-            outline: none;
-            background: none;
-            color: inherit;
-        }
-
-        /* ---------- SIDEBAR ---------- */
+        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             min-width: var(--sidebar-width);
@@ -129,7 +91,6 @@
             z-index: 40;
             transition: transform var(--transition-base);
         }
-
         .sidebar-header {
             padding: 20px 20px 16px;
             border-bottom: 1px solid var(--sidebar-border);
@@ -139,18 +100,13 @@
             min-height: var(--header-height);
             flex-shrink: 0;
         }
-
         .sidebar-header img {
             height: 70px;
             object-fit: cover;
             padding: 4px;
             transition: transform var(--transition-base);
         }
-
-        .sidebar-header img:hover {
-            transform: scale(1.05) rotate(-3deg);
-        }
-
+        .sidebar-header img:hover { transform: scale(1.05) rotate(-3deg); }
         .brand-title {
             font-size: 20px;
             font-weight: 800;
@@ -160,7 +116,6 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
         .user-profile {
             padding: 14px 16px;
             margin: 0 8px 10px;
@@ -171,7 +126,6 @@
             align-items: center;
             gap: 12px;
         }
-
         .user-avatar {
             width: 44px;
             height: 44px;
@@ -184,12 +138,7 @@
             font-size: 22px;
             box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.2);
         }
-
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
+        .user-info { flex: 1; min-width: 0; }
         .user-name {
             font-size: 14px;
             font-weight: 700;
@@ -199,7 +148,6 @@
             overflow: hidden;
             letter-spacing: -0.01em;
         }
-
         .user-status {
             font-size: 11px;
             font-weight: 500;
@@ -208,7 +156,6 @@
             letter-spacing: 0.05em;
             margin-top: 2px;
         }
-
         .contacts-list {
             flex: 1;
             overflow-y: auto;
@@ -218,7 +165,6 @@
             flex-direction: column;
             gap: 2px;
         }
-
         .contacts-list::before {
             content: "Contacts";
             display: block;
@@ -229,7 +175,6 @@
             color: var(--sidebar-text-muted);
             padding: 8px 14px 10px;
         }
-
         .contact {
             display: flex;
             align-items: center;
@@ -246,18 +191,12 @@
             border: 1px solid transparent;
             user-select: none;
         }
-
-        .contact:hover {
-            background: var(--sidebar-hover);
-            transform: translateX(2px);
-        }
-
+        .contact:hover { background: var(--sidebar-hover); transform: translateX(2px); }
         .contact.active {
             background: var(--sidebar-active);
             border-color: rgba(20, 184, 166, 0.25);
             color: #fff;
         }
-
         .contact.active::after {
             content: "";
             position: absolute;
@@ -269,13 +208,7 @@
             background: var(--brand-gradient);
             border-radius: var(--radius-full);
         }
-
-        .sidebar-footer {
-            padding: 16px;
-            border-top: 1px solid var(--sidebar-border);
-            flex-shrink: 0;
-        }
-
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--sidebar-border); flex-shrink: 0; }
         .logout-btn {
             width: 100%;
             padding: 12px 16px;
@@ -291,20 +224,15 @@
             transition: all var(--transition-fast);
             border: 1px solid rgba(239, 68, 68, 0.15);
         }
-
         .logout-btn:hover {
             background: rgba(239, 68, 68, 0.15);
             color: #fecaca;
             border-color: rgba(239, 68, 68, 0.3);
             transform: translateY(-1px);
         }
+        .logout-btn::before { content: "🚪"; font-size: 16px; }
 
-        .logout-btn::before {
-            content: "🚪";
-            font-size: 16px;
-        }
-
-        /* ---------- MAIN CHAT AREA ---------- */
+        /* Chat area */
         .chat-area {
             flex: 1;
             display: flex;
@@ -313,11 +241,9 @@
             background: var(--chat-bg);
             position: relative;
             min-width: 0;
-            background-image:
-                radial-gradient(circle at 1px 1px, var(--chat-bg-pattern) 1px, transparent 0);
+            background-image: radial-gradient(circle at 1px 1px, var(--chat-bg-pattern) 1px, transparent 0);
             background-size: 24px 24px;
         }
-
         .chat-header {
             min-height: var(--header-height);
             padding: 14px 24px;
@@ -331,7 +257,6 @@
             flex-shrink: 0;
             z-index: 10;
         }
-
         #mobileToggle {
             display: none;
             width: 40px;
@@ -345,12 +270,7 @@
             transition: all var(--transition-fast);
             flex-shrink: 0;
         }
-
-        #mobileToggle:hover {
-            background: #f8fafc;
-            transform: scale(1.05);
-        }
-
+        #mobileToggle:hover { background: #f8fafc; transform: scale(1.05); }
         #headerTitle {
             font-size: 16px;
             font-weight: 700;
@@ -361,7 +281,6 @@
             gap: 10px;
             flex-wrap: wrap;
         }
-
         .encryption-badge {
             display: inline-flex;
             align-items: center;
@@ -377,24 +296,19 @@
             white-space: nowrap;
             animation: badge-glow 3s ease-in-out infinite;
         }
-
         @keyframes badge-glow {
             0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
             50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08); }
         }
 
-        /* ---------- WELCOME SCREEN ---------- */
+        /* Welcome */
         .welcome-screen {
             flex: 1;
             display: none;
             overflow-y: auto;
             padding: 40px 20px;
         }
-
-        .welcome-screen.active {
-            display: flex;
-        }
-
+        .welcome-screen.active { display: flex; }
         .welcome-content {
             display: flex;
             flex-direction: column;
@@ -405,46 +319,12 @@
             max-width: 420px;
             animation: fade-in 0.6s var(--ease);
         }
-
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .welcome-icon {
-            font-size: 72px;
-            margin-bottom: 24px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .welcome-content h2 {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--chat-text);
-            margin-bottom: 12px;
-            letter-spacing: -0.02em;
-        }
-
-        .welcome-content > p {
-            font-size: 16px;
-            color: var(--chat-text-muted);
-            margin-bottom: 32px;
-            line-height: 1.5;
-        }
-
-        .welcome-features {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 32px;
-            width: 100%;
-        }
-
+        @keyframes fade-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .welcome-icon { font-size: 72px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .welcome-content h2 { font-size: 28px; font-weight: 800; color: var(--chat-text); margin-bottom: 12px; letter-spacing: -0.02em; }
+        .welcome-content > p { font-size: 16px; color: var(--chat-text-muted); margin-bottom: 32px; line-height: 1.5; }
+        .welcome-features { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; width: 100%; }
         .feature {
             display: flex;
             align-items: flex-start;
@@ -455,26 +335,14 @@
             border-radius: var(--radius-md);
             transition: all var(--transition-base);
         }
-
-        .feature:hover {
-            background: #f8fafc;
-            border-color: var(--brand-primary);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
+        .feature:hover { background: #f8fafc; border-color: var(--brand-primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
         .feature-icon { font-size: 28px; min-width: 40px; display: flex; align-items: center; justify-content: center; }
         .feature-text { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
         .feature-text strong { font-size: 14px; font-weight: 700; color: var(--chat-text); display: block; margin-bottom: 2px; }
         .feature-text span { font-size: 12px; color: var(--chat-text-muted); font-weight: 500; }
+        .welcome-hint { font-size: 14px; color: var(--chat-text-muted); font-weight: 500; }
 
-        .welcome-hint {
-            font-size: 14px;
-            color: var(--chat-text-muted);
-            font-weight: 500;
-        }
-
-        /* ---------- MESSAGE DISPLAY ---------- */
+        /* Messages */
         .message-display {
             flex: 1;
             overflow-y: auto;
@@ -485,11 +353,7 @@
             gap: 6px;
             scroll-behavior: smooth;
         }
-
-        .message-display.active {
-            display: flex;
-        }
-
+        .message-display.active { display: flex; }
         .message-display:empty::before {
             content: "🔐\A End-to-end encrypted\A Select a contact to start secure messaging";
             white-space: pre;
@@ -504,7 +368,6 @@
             height: 100%;
             font-weight: 500;
         }
-
         .message {
             max-width: 72%;
             padding: 10px 14px 8px;
@@ -518,12 +381,7 @@
             box-shadow: var(--shadow-sm);
             margin-bottom: 2px;
         }
-
-        @keyframes bubble-in {
-            from { opacity: 0; transform: translateY(8px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
+        @keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .message.sent {
             background: var(--bubble-sent-bg);
             color: var(--bubble-sent-text);
@@ -532,7 +390,6 @@
             border-bottom-right-radius: 6px;
             box-shadow: 0 2px 8px rgba(20, 184, 166, 0.25);
         }
-
         .message.received {
             background: var(--bubble-received-bg);
             color: var(--bubble-received-text);
@@ -541,7 +398,6 @@
             border: 1px solid var(--bubble-received-border);
             border-bottom-left-radius: 6px;
         }
-
         .message small, .message .time {
             display: inline-block;
             font-size: 10.5px;
@@ -553,11 +409,10 @@
             letter-spacing: -0.02em;
             vertical-align: baseline;
         }
-
         .message.sent .time { color: rgba(255, 255, 255, 0.85); }
         .message.received .time { color: var(--chat-text-muted); }
 
-        /* ---------- INPUT AREA ---------- */
+        /* Input */
         .input-area {
             padding: 14px 20px 18px;
             background: var(--chat-header-bg);
@@ -569,11 +424,7 @@
             gap: 10px;
             flex-shrink: 0;
         }
-
-        .input-area.active {
-            display: flex;
-        }
-
+        .input-area.active { display: flex; }
         #msgInput {
             flex: 1;
             padding: 13px 18px;
@@ -585,14 +436,12 @@
             transition: all var(--transition-fast);
             min-width: 0;
         }
-
         #msgInput::placeholder { color: var(--chat-text-muted); font-weight: 400; }
         #msgInput:focus {
             border-color: var(--brand-primary);
             box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
             background: #fff;
         }
-
         #sendBtn {
             width: 46px;
             height: 46px;
@@ -609,7 +458,6 @@
             position: relative;
             flex-shrink: 0;
         }
-
         #sendBtn::before {
             content: "";
             width: 18px;
@@ -619,16 +467,11 @@
             mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M22 2L11 13'/><path d='M22 2l-7 20-4-9-9-4 20-7z'/></svg>") center/contain no-repeat;
             transition: transform var(--transition-fast);
         }
-
-        #sendBtn:hover:not(:disabled) {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 12px 28px rgba(20, 184, 166, 0.4);
-        }
-
+        #sendBtn:hover:not(:disabled) { transform: translateY(-2px) scale(1.05); box-shadow: 0 12px 28px rgba(20, 184, 166, 0.4); }
         #sendBtn:active:not(:disabled) { transform: translateY(0) scale(0.96); }
         #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; background: #cbd5e1; }
 
-        /* ---------- TOAST ---------- */
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -645,7 +488,6 @@
             z-index: 9999;
             animation: toast-slide-in 0.4s var(--ease-bounce);
         }
-
         .toast::before {
             content: "⚠";
             position: absolute;
@@ -663,28 +505,18 @@
             font-size: 12px;
             font-weight: 700;
         }
+        @keyframes toast-slide-in { from { opacity: 0; transform: translateX(calc(100% + 24px)); } to { opacity: 1; transform: translateX(0); } }
+        .toast.hiding { animation: toast-slide-out 0.3s var(--ease) forwards; }
+        @keyframes toast-slide-out { to { opacity: 0; transform: translateX(calc(100% + 24px)); } }
 
-        @keyframes toast-slide-in {
-            from { opacity: 0; transform: translateX(calc(100% + 24px)); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .toast.hiding {
-            animation: toast-slide-out 0.3s var(--ease) forwards;
-        }
-
-        @keyframes toast-slide-out {
-            to { opacity: 0; transform: translateX(calc(100% + 24px)); }
-        }
-
-        /* ---------- SCROLLBARS ---------- */
+        /* Scrollbars */
         .message-display::-webkit-scrollbar { width: 6px; }
         .message-display::-webkit-scrollbar-track { background: transparent; }
         .message-display::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.25); border-radius: var(--radius-full); }
         .contacts-list::-webkit-scrollbar { width: 6px; }
         .contacts-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: var(--radius-full); }
 
-        /* ---------- MOBILE BACKDROP ---------- */
+        /* Mobile */
         #sidebarBackdrop {
             display: none;
             position: fixed;
@@ -696,10 +528,8 @@
             opacity: 0;
             transition: opacity var(--transition-base);
         }
-
         #sidebarBackdrop.active { display: block; opacity: 1; }
 
-        /* ---------- RESPONSIVE ---------- */
         @media (max-width: 768px) {
             :root { --sidebar-width: 285px; --header-height: 64px; }
             .sidebar {
@@ -710,12 +540,8 @@
             .sidebar.open { transform: translateX(0); }
             #mobileToggle { display: flex; }
         }
-
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
@@ -725,10 +551,7 @@
         <div class="sidebar-header">
             <img src="{{ asset('images/Logo.png') }}" alt="OnlyChat Logo"
                  onerror="this.style.background='linear-gradient(135deg, #14b8a6, #0d9488)'; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><text x=%2220%22 y=%2226%22 font-size=%2220%22 text-anchor=%22middle%22 fill=%22white%22>🔐</text></svg>';">
-            
         </div>
-
-        <!-- User Profile -->
         <div class="user-profile">
             <div class="user-avatar">👤</div>
             <div class="user-info">
@@ -736,8 +559,6 @@
                 <div class="user-status">Online</div>
             </div>
         </div>
-
-        <!-- Contacts -->
         <div id="users" class="contacts-list">
             @foreach ($users as $user)
                 <div class="contact" onclick="selectContact('{{ $user->name }}', {{ $user->id }})">
@@ -746,8 +567,6 @@
                 </div>
             @endforeach
         </div>
-
-        <!-- Logout -->
         <div class="sidebar-footer">
             <form method="POST" action="{{ route('logout') }}" id="logoutForm" style="margin:0;">
                 @csrf
@@ -756,7 +575,6 @@
         </div>
     </aside>
 
-    <!-- Mobile Backdrop -->
     <div id="sidebarBackdrop"></div>
 
     <!-- Main Chat -->
@@ -775,7 +593,6 @@
             </h2>
         </header>
 
-        <!-- Welcome Screen -->
         <div id="welcomeScreen" class="welcome-screen active">
             <div class="welcome-content">
                 <div class="welcome-icon">🔐</div>
@@ -808,10 +625,8 @@
             </div>
         </div>
 
-        <!-- Message Display -->
         <div id="messageDisplay" class="message-display"></div>
 
-        <!-- Input Form -->
         <form id="messageForm" class="input-area" onsubmit="sendMessage(event)">
             @csrf
             <input type="hidden" name="receiver_id" id="receiver_id">
@@ -821,27 +636,21 @@
         </form>
     </main>
 
-    <!-- Toast Error -->
     <div class="toast" id="errorToast" style="display: none;"></div>
 
     <script>
-        // ── Logout langsung tanpa konfirmasi (SweetAlert dihapus) ──
+        // ── Logout ──
         document.getElementById('logoutForm').addEventListener('submit', function(e) {
-            // Tidak ada e.preventDefault() lagi, biarkan form submit normal
-            // Form akan langsung terkirim ke route logout
-            // Hapus semua event default? Biarkan form berjalan normal.
-            // Namun karena kita ingin langsung logout, kita tidak mengganggu proses submit.
-            // Kode ini hanya untuk memastikan tidak ada interupsi.
-            // Tidak perlu e.preventDefault().
-            // Form akan submit secara langsung.
+            // biarkan form submit normal
         });
 
         // ── Variabel global ─────────────────────────────────────────────────
         const myId = {{ auth()->id() }};
-        let pollingInterval = null;
-        const displayedMessageIds = new Set(); // Melacak ID pesan yang sudah ditampilkan
+        let currentUserId = null;
+        let lastMessageId = 0;
+        const displayedMessageIds = new Set();
 
-        // ── Fungsi untuk menambahkan satu pesan ke DOM (tanpa mengganti semuanya) ──
+        // ── Fungsi tambahan ────────────────────────────────────────────────
         function appendMessage(msg, container) {
             const div = document.createElement('div');
             const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -850,7 +659,6 @@
             container.appendChild(div);
         }
 
-        // Helper untuk escape XSS
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, function(m) {
@@ -861,6 +669,17 @@
             }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
                 return c;
             });
+        }
+
+        function showError(msg) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            toast.classList.remove('hiding');
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 4000);
         }
 
         // ── Mobile Drawer ──────────────────────────────────────────────────
@@ -875,64 +694,51 @@
                 sidebar.classList.add('open');
                 backdrop.classList.add('active');
             }
-
             function closeSidebar() {
                 sidebar.classList.remove('open');
                 backdrop.classList.remove('active');
             }
-
             toggle.addEventListener('click', (e) => {
                 e.stopPropagation();
                 sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
             });
-
             backdrop.addEventListener('click', closeSidebar);
-
             document.getElementById('users').addEventListener('click', (e) => {
                 if (window.innerWidth <= 768 && e.target.closest('.contact')) {
                     setTimeout(closeSidebar, 150);
                 }
             });
-
             window.addEventListener('resize', () => {
                 if (window.innerWidth > 768) closeSidebar();
             });
-
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeSidebar();
             });
         })();
 
-        // ── Toast Error ────────────────────────────────────────────────────
-        function showError(msg) {
-            const toast = document.getElementById('errorToast');
-            toast.textContent = msg;
-            toast.style.display = 'block';
-            toast.classList.remove('hiding');
-            setTimeout(() => {
-                toast.classList.add('hiding');
-                setTimeout(() => { toast.style.display = 'none'; }, 300);
-            }, 4000);
-        }
-
         // ── Pilih Kontak ───────────────────────────────────────────────────
         function selectContact(name, userId) {
+            currentUserId = userId;
+            lastMessageId = 0;
+            displayedMessageIds.clear();
+
+            // Highlight
             const contactElements = document.querySelectorAll('#users .contact');
             contactElements.forEach(el => el.classList.remove('active'));
-            // event.currentTarget tidak tersedia karena dipanggil dari onclick, gunakan window.event
             if (window.event && window.event.currentTarget) {
                 window.event.currentTarget.classList.add('active');
             } else {
-                // fallback: cari berdasarkan data
                 const clicked = Array.from(contactElements).find(el => el.innerText.includes(name));
                 if (clicked) clicked.classList.add('active');
             }
 
+            // Update header
             const headerTitle = document.getElementById('headerTitle');
             if (headerTitle) {
                 headerTitle.innerHTML = `${escapeHtml(name)} <span class="encryption-badge" id="encryptionBadge">🔐 DH + AES-256 Encrypted</span>`;
             }
 
+            // Tampilkan chat
             document.getElementById('welcomeScreen').classList.remove('active');
             document.getElementById('messageDisplay').classList.add('active');
             document.getElementById('messageForm').classList.add('active');
@@ -941,37 +747,49 @@
             document.getElementById('msgInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
 
-            // Reset pelacak pesan
-            displayedMessageIds.clear();
-            if (pollingInterval) clearInterval(pollingInterval);
+            // Ambil pesan (tanpa polling)
             fetchMessages(userId);
-            pollingInterval = setInterval(() => fetchMessages(userId), 3000);
         }
 
-        // ── Ambil & Tampilkan Pesan (tanpa kedip) ─────────────────────────
+        // ── Ambil & Tampilkan Pesan ──────────────────────────────────────
         function fetchMessages(userId) {
-            fetch(`/messages/${userId}`)
+            const startTime = performance.now();
+
+            fetch(`/messages/${userId}?last_id=${lastMessageId}`)
                 .then(res => {
                     if (!res.ok) throw new Error('Gagal mengambil pesan');
                     return res.json();
                 })
                 .then(data => {
                     let messages = [];
+                    let newLastId = lastMessageId;
 
                     if (data.messages !== undefined) {
                         messages = data.messages;
                         if (data.aes_shared_key) {
                             console.log('🔓 Educational Mode - AES Shared Key:', data.aes_shared_key);
                         }
+                        if (data.last_id !== undefined) {
+                            newLastId = data.last_id;
+                        } else if (messages.length > 0) {
+                            newLastId = messages[messages.length - 1].id;
+                        }
                     } else if (Array.isArray(data)) {
                         messages = data;
+                        if (messages.length > 0) {
+                            newLastId = messages[messages.length - 1].id;
+                        }
                     }
+
+                    // Update lastMessageId
+                    lastMessageId = newLastId;
 
                     const display = document.getElementById('messageDisplay');
 
+                    // Inisialisasi (belum ada pesan ditampilkan)
                     if (displayedMessageIds.size === 0) {
                         display.innerHTML = '';
-                        if (!messages || messages.length === 0) {
+                        if (messages.length === 0) {
                             display.innerHTML = '<div style="text-align:center;color:var(--chat-text-muted);padding:40px;">No messages yet. Say hello! 👋</div>';
                             return;
                         }
@@ -979,18 +797,29 @@
                             appendMessage(msg, display);
                             displayedMessageIds.add(msg.id);
                         });
+                        // Log DEC untuk inisialisasi
+                        console.log(`🔓 DEC | ${messages.length} messages decrypted (initial load)`);
                     } else {
+                        // Tambahkan hanya pesan baru
                         const newMessages = messages.filter(msg => !displayedMessageIds.has(msg.id));
-                        newMessages.forEach(msg => {
-                            appendMessage(msg, display);
-                            displayedMessageIds.add(msg.id);
-                        });
+                        if (newMessages.length > 0) {
+                            newMessages.forEach(msg => {
+                                appendMessage(msg, display);
+                                displayedMessageIds.add(msg.id);
+                            });
+                            console.log(`🔓 DEC | ${newMessages.length} new messages decrypted`);
+                        }
                     }
 
+                    // Auto-scroll
                     const isAtBottom = display.scrollHeight - display.clientHeight <= display.scrollTop + 50;
                     if (isAtBottom) {
                         display.scrollTop = display.scrollHeight;
                     }
+
+                    // Log waktu fetch
+                    const endTime = performance.now();
+                    console.log(`⏱️ fetchMessages took ${(endTime - startTime).toFixed(2)} ms`);
                 })
                 .catch(err => {
                     console.error('fetchMessages error:', err);
@@ -1011,6 +840,8 @@
             const msgInput = document.getElementById('msgInput');
             const formData = new FormData(document.getElementById('messageForm'));
 
+            const startEnc = performance.now();
+
             msgInput.value = '';
             msgInput.focus();
 
@@ -1024,7 +855,10 @@
                 return res.json();
             })
             .then(() => {
-                fetchMessages(receiverId);
+                const endEnc = performance.now();
+                console.log(`🔒 ENC | ${(endEnc - startEnc).toFixed(2)} ms (client-side timing)`);
+                // Ambil pesan terbaru setelah kirim
+                if (currentUserId) fetchMessages(currentUserId);
             })
             .catch(err => {
                 console.error('sendMessage error:', err);
@@ -1032,7 +866,7 @@
             });
         }
 
-        // ── Observer untuk fallback auto-scroll ────────────────────────────
+        // ── Observer untuk auto-scroll ────────────────────────────────────
         (function() {
             const msgDisplay = document.getElementById('messageDisplay');
             if (!msgDisplay) return;

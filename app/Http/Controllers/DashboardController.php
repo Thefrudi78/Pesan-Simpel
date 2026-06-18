@@ -30,16 +30,22 @@ class DashboardController extends Controller
     }
 
     /**
-     * Mengambil pesan sekalian munculin shared secret key (untuk demo, biasanya gak dikirim ke client)
+     * Mengambil pesan dengan filter last_id untuk efisiensi.
+     * Mengembalikan last_id terbaru untuk update client.
      */
-    public function getMessages($userId)
+    public function getMessages($userId, Request $request)
     {
+        $lastId = (int) $request->input('last_id', 0);
+
         $myKey    = UserKey::where('user_id', auth()->id())->first();
         $otherKey = UserKey::where('user_id', $userId)->first();
 
         // Jika salah satu belum punya key, kembalikan array kosong
         if (!$myKey || !$otherKey) {
-            return response()->json([]);
+            return response()->json([
+                'messages' => [],
+                'last_id'  => $lastId,
+            ]);
         }
 
         // Hitung shared secret lalu derive AES key
@@ -48,14 +54,32 @@ class DashboardController extends Controller
             $otherKey->public_key
         );
 
-        $messages = Message::where(function ($query) use ($userId) {
+        // Query pesan antara dua user
+        $query = Message::where(function ($query) use ($userId) {
             $query->where('receiver_id', auth()->id())
                   ->where('sender_id', $userId);
         })->orWhere(function ($query) use ($userId) {
             $query->where('sender_id', auth()->id())
                   ->where('receiver_id', $userId);
-        })->oldest()->get();
+        });
 
+        // Filter: hanya ambil pesan dengan ID > lastId
+        if ($lastId > 0) {
+            $query->where('id', '>', $lastId);
+        }
+
+        // Urutkan dari yang paling lama agar tampil kronologis
+        $messages = $query->oldest()->get();
+
+        // Jika tidak ada pesan baru, kirim response cepat (tanpa dekripsi)
+        if ($messages->isEmpty()) {
+            return response()->json([
+                'messages' => [],
+                'last_id'  => $lastId,
+            ]);
+        }
+
+        // Decrypt setiap pesan
         $messages->transform(function ($message) use ($aesKey) {
             try {
                 $message->content = $message->iv
@@ -67,8 +91,12 @@ class DashboardController extends Controller
             return $message;
         });
 
+        // Dapatkan ID terbaru dari pesan yang diambil
+        $newLastId = $messages->last()?->id ?? $lastId;
+
         return response()->json([
             'messages' => $messages,
+            'last_id'  => $newLastId,
             'aes_shared_key' => $aesKey ? base64_encode($aesKey) : null, // For demonstration only
         ]);
     }
@@ -96,7 +124,6 @@ class DashboardController extends Controller
             'iv'          => $encrypted['iv'],
         ]);
 
-        // ✅ Harus return JSON karena dikirim via AJAX fetch()
         return response()->json(['status' => 'sent', 'id' => $message->id]);
     }
 }
