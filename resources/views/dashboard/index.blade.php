@@ -646,6 +646,7 @@
 
         // ── Variabel global ─────────────────────────────────────────────────
         const myId = {{ auth()->id() }};
+        let pollingInterval = null;
         let currentUserId = null;
         let lastMessageId = 0;
         const displayedMessageIds = new Set();
@@ -747,8 +748,16 @@
             document.getElementById('msgInput').disabled = false;
             document.getElementById('sendBtn').disabled = false;
 
-            // Ambil pesan (tanpa polling)
+            // Bersihkan polling lama
+            if (pollingInterval) clearInterval(pollingInterval);
+
+            // Ambil pesan pertama kali
             fetchMessages(userId);
+
+            // Mulai polling setiap 3 detik
+            pollingInterval = setInterval(() => {
+                if (currentUserId) fetchMessages(currentUserId);
+            }, 3000);
         }
 
         // ── Ambil & Tampilkan Pesan ──────────────────────────────────────
@@ -781,7 +790,7 @@
                         }
                     }
 
-                    // Update lastMessageId
+                    // Update lastMessageId (selalu update, meskipun tidak ada pesan)
                     lastMessageId = newLastId;
 
                     const display = document.getElementById('messageDisplay');
@@ -791,14 +800,16 @@
                         display.innerHTML = '';
                         if (messages.length === 0) {
                             display.innerHTML = '<div style="text-align:center;color:var(--chat-text-muted);padding:40px;">No messages yet. Say hello! 👋</div>';
+                            const endTime = performance.now();
+                            console.log(`🔓 DEC | 0 messages | ${(endTime - startTime).toFixed(2)} ms`);
                             return;
                         }
                         messages.forEach(msg => {
                             appendMessage(msg, display);
                             displayedMessageIds.add(msg.id);
                         });
-                        // Log DEC untuk inisialisasi
-                        console.log(`🔓 DEC | ${messages.length} messages decrypted (initial load)`);
+                        const endTime = performance.now();
+                        console.log(`🔓 DEC | ${messages.length} messages (initial load) | ${(endTime - startTime).toFixed(2)} ms`);
                     } else {
                         // Tambahkan hanya pesan baru
                         const newMessages = messages.filter(msg => !displayedMessageIds.has(msg.id));
@@ -807,7 +818,12 @@
                                 appendMessage(msg, display);
                                 displayedMessageIds.add(msg.id);
                             });
-                            console.log(`🔓 DEC | ${newMessages.length} new messages decrypted`);
+                            const endTime = performance.now();
+                            console.log(`🔓 DEC | ${newMessages.length} new messages | ${(endTime - startTime).toFixed(2)} ms`);
+                        } else {
+                            // Tidak ada pesan baru – tetap catat waktu (opsional)
+                            // const endTime = performance.now();
+                            // console.log(`🔓 DEC | 0 new messages | ${(endTime - startTime).toFixed(2)} ms`);
                         }
                     }
 
@@ -816,10 +832,6 @@
                     if (isAtBottom) {
                         display.scrollTop = display.scrollHeight;
                     }
-
-                    // Log waktu fetch
-                    const endTime = performance.now();
-                    console.log(`⏱️ fetchMessages took ${(endTime - startTime).toFixed(2)} ms`);
                 })
                 .catch(err => {
                     console.error('fetchMessages error:', err);
