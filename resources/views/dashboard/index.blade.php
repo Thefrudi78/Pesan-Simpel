@@ -683,6 +683,14 @@
             }, 4000);
         }
 
+        // ── Auto-scroll ke bawah ──────────────────────────────────────────
+        function scrollToBottom() {
+            const display = document.getElementById('messageDisplay');
+            if (display) {
+                display.scrollTop = display.scrollHeight;
+            }
+        }
+
         // ── Mobile Drawer ──────────────────────────────────────────────────
         (function() {
             const sidebar = document.getElementById('sidebar');
@@ -808,6 +816,8 @@
                             appendMessage(msg, display);
                             displayedMessageIds.add(msg.id);
                         });
+                        // SCROLL KE BAWAH SAAT PERTAMA KALI LOAD
+                        scrollToBottom();
                         const endTime = performance.now();
                         console.log(`🔓 DEC | ${messages.length} messages (initial load) | ${(endTime - startTime).toFixed(2)} ms`);
                     } else {
@@ -818,19 +828,12 @@
                                 appendMessage(msg, display);
                                 displayedMessageIds.add(msg.id);
                             });
+                            // SCROLL KE BAWAH SAAT ADA PESAN BARU
+                            scrollToBottom();
                             const endTime = performance.now();
                             console.log(`🔓 DEC | ${newMessages.length} new messages | ${(endTime - startTime).toFixed(2)} ms`);
-                        } else {
-                            // Tidak ada pesan baru – tetap catat waktu (opsional)
-                            // const endTime = performance.now();
-                            // console.log(`🔓 DEC | 0 new messages | ${(endTime - startTime).toFixed(2)} ms`);
                         }
-                    }
-
-                    // Auto-scroll
-                    const isAtBottom = display.scrollHeight - display.clientHeight <= display.scrollTop + 50;
-                    if (isAtBottom) {
-                        display.scrollTop = display.scrollHeight;
+                        // Jika tidak ada pesan baru, tidak perlu scroll
                     }
                 })
                 .catch(err => {
@@ -878,11 +881,20 @@
             });
         }
 
-        // ── Observer untuk auto-scroll ────────────────────────────────────
+        // ── Observer untuk auto-scroll (opsional, tetap dipertahankan) ──
         (function() {
             const msgDisplay = document.getElementById('messageDisplay');
             if (!msgDisplay) return;
             const observer = new MutationObserver(() => {
+                // Saat terjadi perubahan, kita biarkan scrollToBottom di fetchMessages yang menangani,
+                // tapi observer ini juga bisa dipakai sebagai fallback jika ada perubahan lain.
+                // Kita panggil scrollToBottom hanya jika user berada di dekat bawah?
+                // Namun kita sudah memanggil scrollToBottom di fetchMessages, jadi observer ini
+                // hanya sebagai pelengkap jika ada perubahan lain (misalnya dari luar).
+                // Kita biarkan seperti semula, atau kita bisa hapus.
+                // Untuk keamanan, kita biarkan dengan logika lama agar tidak mengganggu.
+                // Tapi karena kita sudah memanggil scrollToBottom di fetchMessages, observer ini
+                // tidak perlu lagi. Kita pertahankan agar kode tetap konsisten.
                 const isNearBottom = msgDisplay.scrollHeight - msgDisplay.clientHeight <= msgDisplay.scrollTop + 60;
                 if (isNearBottom) {
                     msgDisplay.scrollTop = msgDisplay.scrollHeight;
